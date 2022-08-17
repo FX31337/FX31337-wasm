@@ -1,0 +1,13 @@
+# Ignores configuration files that may contain sensitive information.
+build.properties
+
+# Ignores compiled binary files.
+*.ex?
+*.o
+*.out
+
+# Ignores log files.
+*.log
+
+# Ignores Finder metadata files on Mac
+.DS_Store
