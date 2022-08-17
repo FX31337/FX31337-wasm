@@ -31,8 +31,8 @@
 #include "classes/String.extern.h"
 
 int main(int argc, char **argv) {
-  // TradeSignalManager tsm;
-  // TradeSignalEntry signal1;
+  TradeSignalManager tsm;
+  TradeSignalEntry signal1;
   //  tsm.SignalAdd(signal1);
   //  printf("%s", tsm.ToString());
   printf("Hello World!\n");

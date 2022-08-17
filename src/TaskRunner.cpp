@@ -29,7 +29,30 @@
 #include "classes/String.extern.h"
 #include "classes/Task/Task.h"
 
+class ConditionType1 : public TaskConditionBase {
+ public:
+  bool Check(const TaskConditionEntry &_entry) { return true; }
+};
+class ConditionType2 : public TaskConditionBase {
+ public:
+  bool Check(const TaskConditionEntry &_entry) { return true; }
+};
+class ActionType1 : public TaskActionBase {
+ public:
+  bool Run(const TaskActionEntry &_entry) { return true; }
+};
+class ActionType2 : public TaskActionBase {
+ public:
+  bool Run(const TaskActionEntry &_entry) { return true; }
+};
+
 int main(int argc, char **argv) {
+  Task task;
+  TaskAction<ActionType1> _taction1;
+  TaskAction<ActionType2> _taction2;
+  TaskCondition<ConditionType1> _tcond1;
+  TaskCondition<ConditionType2> _tcond2;
+  // printf("%s", task.ToString());
   printf("Hello World!\n");
   return 0;
 }
