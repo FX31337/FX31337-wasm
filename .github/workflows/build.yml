@@ -1,0 +1,31 @@
+---
+name: Build
+
+# yamllint disable-line rule:truthy
+on:
+  pull_request:
+    paths-ignore:
+      - '**.md'
+  push:
+    paths-ignore:
+      - '**.md'
+
+jobs:
+
+  Compile:
+    defaults:
+      run:
+        shell: bash
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Install Emscripten toolchain
+        uses: mymindstorm/setup-emsdk@v11
+      - name: Install CPP compiler
+        uses: rlalik/setup-cpp-compiler@v1.1
+        with:
+          compiler: gcc-latest
+      - name: Build
+        run: npm run build

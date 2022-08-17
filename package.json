@@ -4,6 +4,7 @@
   "description": "FX31337 engine in wasm",
   "main": "index.js",
   "scripts": {
+    "build": "make -C src",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

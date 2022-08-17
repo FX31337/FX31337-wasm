@@ -1,6 +1,6 @@
-CC=gcc
+CC=emcc
 CXX=g++
-CPPFLAGS=-g $(shell root-config --cflags)
+CPPFLAGS=-g
 RM=rm -v
 
 .PHONY: all clean test
