@@ -18,6 +18,7 @@
     "build": "make -C src",
     "clean": "make -C src clean; git clean -fX",
     "postbuild": "cp src/*.html src/*.js src/*.wasm dist/",
+    "rebuild": "npm run clean; npm run build",
     "start": "cd dist; http-server",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
