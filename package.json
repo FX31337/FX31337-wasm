@@ -1,17 +1,25 @@
 {
-  "name": "fx31337-wasm",
-  "version": "0.1.2",
+  "author": "kenorb",
   "description": "FX31337 engine in wasm",
+  "bugs": {
+    "url": "https://github.com/FX31337/FX31337-wasm/issues"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  },
+  "homepage": "https://github.com/FX31337/FX31337-wasm#readme",
   "main": "index.js",
+  "name": "fx31337-wasm",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FX31337/FX31337-wasm.git"
+  },
   "scripts": {
     "build": "make -C src",
     "clean": "make -C src clean; git clean -fX",
     "postbuild": "cp src/*.html src/*.js src/*.wasm dist/",
+    "start": "cd dist; http-server",
     "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/FX31337/FX31337-wasm.git"
   },
   "keywords": [
     "EA31337",
@@ -19,10 +27,6 @@
     "Forex",
     "trading"
   ],
-  "author": "kenorb",
   "license": "GPL-3.0-or-later",
-  "bugs": {
-    "url": "https://github.com/FX31337/FX31337-wasm/issues"
-  },
-  "homepage": "https://github.com/FX31337/FX31337-wasm#readme"
+  "version": "0.1.2"
 }

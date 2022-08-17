@@ -7,6 +7,9 @@ build.properties
 *.out
 *.wasm
 
+# Ignores post-build directories.
+node_modules/
+
 # Ignores post-build files.
 *.html
 *.js

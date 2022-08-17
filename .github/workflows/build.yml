@@ -27,7 +27,6 @@ jobs:
         uses: rlalik/setup-cpp-compiler@v1.1
         with:
           compiler: gcc-latest
-      - name: Build
-        run: npm run build
-      - name: Clean
-        run: npm run clean
+      - run: npm install
+      - run: npm run build
+      - run: npm run clean
