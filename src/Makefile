@@ -6,7 +6,7 @@ RM=rm -v
 
 .PHONY: all clean test
 
-compile: Trade.o Trade.html
+compile: TaskRunner.o TaskRunner.html Trade.o Trade.html
 
 %.html: %.cpp
 	$(CC) $(CFLAGS) $(CPPFLAGS) $< -o $@

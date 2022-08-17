@@ -1,6 +1,6 @@
 {
   "name": "fx31337-wasm",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "FX31337 engine in wasm",
   "main": "index.js",
   "scripts": {
