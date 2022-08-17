@@ -8,7 +8,7 @@ RM=rm -v
 compile: Trade.o
 
 %.o: %.cpp
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
+	$(CXX) $(CFLAGS) $(CPPFLAGS) -c $<
 
 clean:
-	$(RM) $(OBJS)
+	$(RM) *.o

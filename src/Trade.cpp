@@ -23,10 +23,10 @@
  */
 
 // Includes.
-//#include "classes/Common.define.h"
-//#include "classes/Common.extern.h"
+#include "classes/Common.define.h"
+#include "classes/Common.extern.h"
 #include "classes/Std.h"
-//#include "classes/String.extern.h"
+#include "classes/String.extern.h"
 #include "classes/Trade/TradeSignalManager.h"
 
 int main(int argc, char **argv) {}

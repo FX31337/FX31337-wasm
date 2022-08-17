@@ -29,3 +29,5 @@ jobs:
           compiler: gcc-latest
       - name: Build
         run: npm run build
+      - name: Clean
+        run: npm run clean
