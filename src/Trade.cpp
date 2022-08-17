@@ -29,4 +29,7 @@
 #include "classes/String.extern.h"
 #include "classes/Trade/TradeSignalManager.h"
 
-int main(int argc, char **argv) {}
+int main(int argc, char **argv) {
+  printf("Hello World!\n");
+  return 0;
+}

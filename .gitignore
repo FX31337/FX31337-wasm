@@ -5,6 +5,11 @@ build.properties
 *.ex?
 *.o
 *.out
+*.wasm
+
+# Ignores post-build files.
+*.html
+*.js
 
 # Ignores log files.
 *.log
