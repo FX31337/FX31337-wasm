@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "make -C src",
-    "clean": "make -C src clean",
+    "clean": "make -C src clean; git clean -fX",
+    "postbuild": "cp src/*.html src/*.js src/*.wasm dist/",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
