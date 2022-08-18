@@ -31,7 +31,9 @@
 #include "classes/String.extern.h"
 
 // Declare and define the external functions and variables.
+#ifdef __cplusplus
 extern "C" {
+#endif
 int sum(int a, int b) { return a + b; }
 bool test() {
   printf("%s\n", __builtin_FUNCTION());
@@ -44,7 +46,9 @@ bool test() {
   printf("%s", tsm.ToString().c_str());
   return true;
 }
+#ifdef __cplusplus
 }
+#endif
 
 int main(int argc, char **argv) {
   printf("Hello World!\n");

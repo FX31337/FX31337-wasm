@@ -51,7 +51,9 @@ class ActionType2 : public TaskActionBase {
 };
 
 // Declare and define the external functions and variables.
+#ifdef __cplusplus
 extern "C" {
+#endif
 int sum(int a, int b) { return a + b; }
 bool test_task_action(int aid) {
   TaskActionEntry entry(aid);
@@ -69,7 +71,9 @@ bool test_task_setter(int sid) {
   TaskSetterEntry entry(sid);
   return false;
 }
+#ifdef __cplusplus
 }
+#endif
 
 int main(int argc, char **argv) {
   printf("Hello World!\n");
