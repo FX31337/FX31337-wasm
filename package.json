@@ -4,9 +4,21 @@
   "bugs": {
     "url": "https://github.com/FX31337/FX31337-wasm/issues"
   },
+  "contributors": [
+    {
+      "name": "kenorb",
+      "email": "kenorb@users.noreply.github.com"
+    }
+  ],
   "devDependencies": {
     "http-server": "^14.1.1"
   },
+  "files": [
+    "dist/TaskRunner.js",
+    "dist/TaskRunner.wasm",
+    "dist/TradeSignalManager.js",
+    "dist/TradeSignalManager.wasm"
+  ],
   "homepage": "https://github.com/FX31337/FX31337-wasm#readme",
   "main": "index.js",
   "name": "fx31337-wasm",
