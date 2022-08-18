@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from datetime import datetime
 from wasmer import (
     Function,
     FunctionType,
@@ -9,37 +10,56 @@ from wasmer import (
     Store,
     Type,
 )
-import datetime
+import logging
+import traceback
 
 
 def taskrunner_setusererror(arg1):
+    logger.debug(f"{arg1}")
     taskrunner_throw(arg1)
 
 
 def taskrunner_throw(arg1):
-    print(__name__)
+    logger.debug(f"{arg1}")
     throw(TypeError, arg1)
 
 
 def taskrunner_datetime(arg1):
-    print(__name__)
+    logger.debug(f"{arg1}")
     return arg1
 
 
 def taskrunner_timecurrent():
-    return datetime.now()
+    logger.debug(f"{arg1}, {arg2}")
+    return datetime.timestamp(datetime.now())
+
+
+def taskrunner_datetime(arg1, arg2=0):
+    logger.debug(f"{arg1}, {arg2}")
+    return datetime.timestamp(datetime.now())
 
 
 # Drops into the debugger.
 def taskrunner_debugbreak():
+    logger.debug("todo")
+    traceback.print_exc()
     breakpoint()
 
 
 # Unknown function called.
-def taskrunner_todo(arg1, arg2=0, arg3=0):
-    print(__name__)
+def taskrunner_todo(arg1, arg2=0, arg3=0, arg4=0):
+    logger.debug(f"{arg1}, {arg2}, {arg3}, {arg4}")
+    traceback.print_exc()
     breakpoint()
 
+
+# Configure logging.
+logging.basicConfig(
+    format="%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s",
+    datefmt="%Y-%m-%d:%H:%M:%S",
+    level=logging.DEBUG,
+)
+logger = logging.getLogger(__name__)
 
 # Create a store.
 store = Store()
@@ -71,11 +91,11 @@ import_obj.register(
         ),
         "_ZN8datetimeC1ERKi": Function(
             store,
-            taskrunner_timecurrent,
+            taskrunner_datetime,
             FunctionType([Type.I32, Type.I32], [Type.I32]),
         ),
         "_ZN8datetimeC1Ev": Function(
-            store, taskrunner_timecurrent, FunctionType([Type.I32], [Type.I32])
+            store, taskrunner_datetime, FunctionType([Type.I32], [Type.I32])
         ),
         "_Z10DebugBreakv": Function(store, taskrunner_debugbreak),
         "_Z11TimeCurrentv": Function(
@@ -143,5 +163,7 @@ print("Exported objects:")
 for export in instance.exports:
     print(export)
 
-result = instance.exports.sum(1, 2)
-assert result == 3
+print("Testing...")
+assert instance.exports.sum(1, 2) == 3
+# instance.exports.main(0, 0) # @fixme: TypeError: 'float' object cannot be converted to 'PyLong'
+result = instance.exports.test()
