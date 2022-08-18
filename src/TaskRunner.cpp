@@ -46,6 +46,13 @@ class ActionType2 : public TaskActionBase {
   bool Run(const TaskActionEntry &_entry) { return true; }
 };
 
+// Declare and define the external functions and variables.
+extern "C" {
+  int sum(int a, int b) {
+    return a + b;
+  }
+}
+
 int main(int argc, char **argv) {
   Task task;
   TaskAction<ActionType1> _taction1;

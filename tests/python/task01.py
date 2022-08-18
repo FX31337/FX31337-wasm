@@ -142,3 +142,6 @@ assert isinstance(memory, Memory)
 print("Exported objects:")
 for export in instance.exports:
     print(export)
+
+result = instance.exports.sum(1, 2)
+assert result == 3
