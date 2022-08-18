@@ -36,6 +36,8 @@ def taskrunner_timecurrent():
 
 def taskrunner_datetime(arg1, arg2=0):
     logger.debug(f"{arg1}, {arg2}")
+    # print(reader[arg1:arg1 + 10]) # ?
+    # print(reader[arg2:arg2 + 10]) # ?
     return datetime.timestamp(datetime.now())
 
 
@@ -159,11 +161,19 @@ memory = instance.exports.memory
 assert isinstance(memory, Memory)
 # Congrats, the Wasm module is cross-compiled!
 
+# Creates a memory reader.
+reader = bytearray(memory.buffer)
+
 print("Exported objects:")
 for export in instance.exports:
     print(export)
 
 print("Testing...")
 assert instance.exports.sum(1, 2) == 3
-result = instance.exports.test()
-instance.exports.main(0, 0)
+
+# @fixme
+# instance.exports.test_task_action(1)
+# instance.exports.test_task_condition(1)
+# instance.exports.test_task_getter(1)
+# instance.exports.test_task_setter(1)
+# instance.exports.main(0, 0)

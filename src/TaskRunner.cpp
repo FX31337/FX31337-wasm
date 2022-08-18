@@ -22,7 +22,11 @@
  * Task runner.
  */
 
-// Includes.
+// Includes
+// #include <emscripten/emscripten.h>
+// #include <emscripten/bind.h>
+
+// Local includes.
 #include "classes/Common.define.h"
 #include "classes/Common.extern.h"
 #include "classes/Std.h"
@@ -49,15 +53,21 @@ class ActionType2 : public TaskActionBase {
 // Declare and define the external functions and variables.
 extern "C" {
 int sum(int a, int b) { return a + b; }
-bool test() {
-  printf("%s\n", __builtin_FUNCTION());
-  Task task;
-  // TaskAction<ActionType1> _taction1;
-  // TaskAction<ActionType2> _taction2;
-  // TaskCondition<ConditionType1> _tcond1;
-  // TaskCondition<ConditionType2> _tcond2;
-  printf("%s\n", task.ToString().c_str());
-  return true;
+bool test_task_action(int aid) {
+  TaskActionEntry entry(aid);
+  return false;
+}
+bool test_task_condition(int cid) {
+  TaskConditionEntry entry(cid);
+  return false;
+}
+bool test_task_getter(int gid) {
+  TaskGetterEntry entry(gid);
+  return false;
+}
+bool test_task_setter(int sid) {
+  TaskSetterEntry entry(sid);
+  return false;
 }
 }
 
