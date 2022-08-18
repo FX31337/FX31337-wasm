@@ -30,11 +30,23 @@
 #include "classes/Std.h"
 #include "classes/String.extern.h"
 
-int main(int argc, char **argv) {
+// Declare and define the external functions and variables.
+extern "C" {
+int sum(int a, int b) { return a + b; }
+bool test() {
+  printf("%s\n", __builtin_FUNCTION());
   TradeSignalManager tsm;
   TradeSignalEntry signal1;
-  //  tsm.SignalAdd(signal1);
-  //  printf("%s", tsm.ToString());
+  // TaskAction<ActionType1> _taction1;
+  // TaskAction<ActionType2> _taction2;
+  // TaskCondition<ConditionType1> _tcond1;
+  // TaskCondition<ConditionType2> _tcond2;
+  printf("%s", tsm.ToString().c_str());
+  return true;
+}
+}
+
+int main(int argc, char **argv) {
   printf("Hello World!\n");
   return 0;
 }

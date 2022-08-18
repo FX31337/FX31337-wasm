@@ -62,12 +62,6 @@ bool test() {
 }
 
 int main(int argc, char **argv) {
-  Task task;
-  TaskAction<ActionType1> _taction1;
-  TaskAction<ActionType2> _taction2;
-  TaskCondition<ConditionType1> _tcond1;
-  TaskCondition<ConditionType2> _tcond2;
-  printf("%s\n", task.ToString().c_str());
   printf("Hello World!\n");
   return 0;
 }

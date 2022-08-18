@@ -75,7 +75,7 @@ import_obj.register(
             FunctionType([Type.I32, Type.I32, Type.I32], [Type.I32]),
         ),
         "_Z5AlertIJPKcEEvDpT_": Function(
-            store, taskrunner_todo, FunctionType([Type.I32], [])
+            store, taskrunner_throw, FunctionType([Type.I32], [])
         ),
         "_Z7MathMaxIiET_S0_S0_": Function(
             store, taskrunner_todo, FunctionType([Type.I32, Type.I32], [Type.I32])
@@ -165,5 +165,5 @@ for export in instance.exports:
 
 print("Testing...")
 assert instance.exports.sum(1, 2) == 3
-# instance.exports.main(0, 0) # @fixme: TypeError: 'float' object cannot be converted to 'PyLong'
 result = instance.exports.test()
+instance.exports.main(0, 0)
