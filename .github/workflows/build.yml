@@ -34,3 +34,20 @@ jobs:
           name: dist
           path: dist
       - run: npm run clean
+  Test-Python:
+    defaults:
+      run:
+        shell: bash
+        working-directory: tests/python
+    needs: [Compile]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/download-artifact@v2
+        with:
+          name: dist
+          path: dist
+      - run: pip3 install -r requirements.txt
+      - run: python3 task01.py
+        # Bug: https://github.com/wasmerio/wasmer-python/issues/539
+        if: false
