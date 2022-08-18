@@ -1,6 +1,6 @@
 CC=emcc
-CXX=g++
-CPPFLAGS=-g
+CXX=gcc
+CPPFLAGS=-g -std=c++11
 EMCC_CFLAGS=-s ERROR_ON_UNDEFINED_SYMBOLS=0
 OBJS=*.o *.html *.js *.wasm
 RM=rm -v
