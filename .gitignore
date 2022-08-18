@@ -8,11 +8,14 @@ build.properties
 *.wasm
 
 # Ignores post-build directories.
+CMakeFiles/
 node_modules/
 
 # Ignores post-build files.
+*.cmake
 *.html
 *.js
+*.txt
 
 # Ignores log files.
 *.log
