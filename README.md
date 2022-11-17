@@ -3,7 +3,7 @@
 ## Build
 
 1. `npm install`
-1. `npm build`
+1. `npm run build`
 
 WebAssembly files should be compiled in `dist/` directory.
 
