@@ -37,6 +37,25 @@
 #include "classes/Task/TaskGetter.struct.h"
 #include "classes/Task/TaskSetter.struct.h"
 
+#ifdef EMSCRIPTEN
+#include <emscripten/bind.h>
+using namespace emscripten;
+#endif
+
+class Test {
+ public:
+   int add(int a, int b) { return a + b; }
+};
+
+
+#ifdef EMSCRIPTEN
+EMSCRIPTEN_BINDINGS(Test) {
+  class_<Test>("Test")
+    .function("add", &Test::add)
+    ;
+}
+#endif
+
 // Declare and define the external functions and variables.
 #ifdef __cplusplus
 extern "C" {
@@ -71,7 +90,7 @@ class TaskType1 : public Taskable<MqlParam> {
 
 int sum(int a, int b) { return a + b; }
 bool test() {
-  printf("%s\n", __builtin_FUNCTION());
+  //printf("%s\n", __builtin_FUNCTION());
   TradeSignalManager tsm;
   TradeSignalEntry signal1;
   TaskAction<ActionType1> _taction1;
@@ -88,5 +107,6 @@ bool test() {
 int main(int argc, char **argv) {
   test();
   printf("Hello World 2!\n");
+  std::getchar();
   return 0;
 }

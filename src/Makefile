@@ -2,7 +2,7 @@ CC=emcc
 CPPFLAGS=-g -std=c++11
 CWD=$(abspath $(lastword $(MAKEFILE_LIST)))
 CXX=gcc
-EMCC_CFLAGS=-s ERROR_ON_UNDEFINED_SYMBOLS=0
+EMCC_CFLAGS=-s ERROR_ON_UNDEFINED_SYMBOLS=0 -s EXPORT_NAME=Env -s MODULARIZE=1 --bind --shell-file shell.tpl
 OBJS=*.o *.html *.js *.wasm
 RM=rm -v
 
