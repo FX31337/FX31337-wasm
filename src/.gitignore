@@ -1,0 +1,4 @@
+# Ignores post-build files.
+*.o
+*.js
+*.exports

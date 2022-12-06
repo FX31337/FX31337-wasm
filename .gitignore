@@ -13,12 +13,19 @@ node_modules/
 
 # Ignores post-build files.
 *.cmake
-*.html
-*.js
-*.txt
 
 # Ignores log files.
 *.log
 
 # Ignores Finder metadata files on Mac
 .DS_Store
+
+# Ignores IDE folders/files.
+.idea
+.vs
+/Release
+/Debug
+*.iml
+*.sln
+*.vcxproj*
+/src/out

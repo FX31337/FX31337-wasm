@@ -51,6 +51,7 @@ class Test {
 #ifdef EMSCRIPTEN
 EMSCRIPTEN_BINDINGS(Test) {
   class_<Test>("Test")
+    .constructor()
     .function("add", &Test::add)
     ;
 }
@@ -105,8 +106,11 @@ bool test() {
 #endif
 
 int main(int argc, char **argv) {
-  test();
+  /*
+    test();
   printf("Hello World 2!\n");
   std::getchar();
+
+  */
   return 0;
 }
