@@ -28,7 +28,7 @@
   },
   "scripts": {
     "build": "make -C src",
-    "clean": "make -C src clean; git clean -fX",
+    "clean": "make -C src clean",
     "postbuild": "mv src/*.js src/*.wasm dist/",
     "rebuild": "npm run clean; npm run build",
     "start": "cd dist; http-server",

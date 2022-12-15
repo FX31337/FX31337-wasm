@@ -25,6 +25,8 @@
 // Includes
 // #include <emscripten/emscripten.h>
 // #include <emscripten/bind.h>
+#define __debug__
+#define __debug_verbose__
 
 // Local includes.
 #include "classes/Common.define.h"
@@ -32,6 +34,7 @@
 #include "classes/Std.h"
 #include "classes/String.extern.h"
 #include "classes/Task/Task.h"
+#include "classes/Task/TaskManager.h"
 
 class ConditionType1 : public TaskConditionBase {
  public:
@@ -76,6 +79,6 @@ bool test_task_setter(int sid) {
 #endif
 
 int main(int argc, char **argv) {
-  printf("Hello World!\n");
+  Print("Hello World!");
   return 0;
 }
