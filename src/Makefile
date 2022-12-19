@@ -11,7 +11,7 @@ RM=rm -v
 
 #compile: TaskRunner.o TaskRunner.js TradeSignalManager.o TradeSignalManager.js
 #compile: TradeSignalManager.o TradeSignalManager.js
-compile: TaskRunner.o TaskRunner.js
+compile: Chart.js Chart.o TaskRunner.js TaskRunner.o
 
 %.js: %.cpp
 	$(CC) $(EMCC_CFLAGS) $(CFLAGS) $(CPPFLAGS) $< -o $@
