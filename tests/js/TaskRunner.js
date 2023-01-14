@@ -8,6 +8,7 @@ class Test extends Runner.Test {
 
     console.log(tm);
     console.log(task1);
+    task1.delete();
 
     tm.Clear();
   }
