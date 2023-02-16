@@ -29,7 +29,7 @@
   "scripts": {
     "build": "make -C src",
     "clean": "make -C src clean",
-    "postbuild": "mv src/*.js src/*.wasm dist/",
+    "postbuild": "find src \\( -name '*.obj' -o -name '*.wasm' -o -name '*.js' \\) -type f -exec mv -v {} dist/ \\;",
     "rebuild": "npm run clean; npm run build",
     "start": "cd dist; http-server",
     "test": "echo \"Error: no test specified\" && exit 1"
