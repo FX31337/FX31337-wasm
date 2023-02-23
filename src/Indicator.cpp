@@ -23,15 +23,21 @@
  */
 
 // Includes
-// #include <emscripten/emscripten.h>
-// #include <emscripten/bind.h>
+#ifdef EMSCRIPTEN
+#include <emscripten/bind.h>
+#include <emscripten/emscripten.h>
+#endif
 #define __debug__
 #define __debug_verbose__
 
 // Local includes.
 #include "classes/Indicator/Indicator.h"
+#include "classes/Indicator/tests/classes/IndicatorTfDummy.h"
+#include "classes/Indicators/Tick/Indi_TickProvider.h"
+#include "classes/Tick/Tick.struct.h"
 
 int main(int argc, char **argv) {
   Print("Hello World from Indicator test!");
+  std::cout << "Hello from C++!" << std::endl;
   return 0;
 }
