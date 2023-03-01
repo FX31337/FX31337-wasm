@@ -4,7 +4,7 @@ class Test extends Runner.Test {
   run(lib) {
     const tickProvider = new lib.Indi_TickProvider();
 
-    console.log (lib);
+    console.log(lib);
 
     const tick1 = new lib.TickTAB();
     const tick2 = new lib.TickTAB();
@@ -28,13 +28,16 @@ class Test extends Runner.Test {
     ticks.Push(tick2);
     ticks.Push(tick3);
 
-    console.log (`There are: ${ticks.Size()} ticks added.`);
-    console.log (`There was: ${tickProvider.BufferSize()} ticks in TickProvider buffer.`);
+    console.log(`There are: ${ticks.Size()} ticks added.`);
+    console.log(`There was: ${tickProvider.BufferSize()} ticks in TickProvider buffer.`);
 
     tickProvider.Feed(ticks);
 
     console.log(`There are: ${tickProvider.BufferSize()} ticks in TickProvider buffer.`);
+
+    lib.IndicatorTest.Init();
+    lib.IndicatorTest.Run();
   }
 }
 
-Runner.run(Test, 'Indicator');
+Runner.run(Test, 'IndicatorTest');
