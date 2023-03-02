@@ -12,7 +12,8 @@ RM=find . \( -name "*.obj" -o -name "*.wasm" \) -type f -delete
 #compile: TaskRunner.o TaskRunner.js TradeSignalManager.o TradeSignalManager.js
 #compile: TradeSignalManager.o TradeSignalManager.js
 compile: \
-	TaskRunner.o TaskRunner.js \
+	IndicatorTest.o IndicatorTest.js \
+#	TaskRunner.o TaskRunner.js \
 	classes/Task/tests/Task.test.o classes/Task/tests/Task.test.js \
 	classes/Task/tests/Taskable.test.o classes/Task/tests/Taskable.test.js \
 	classes/Task/tests/TaskAction.test.o classes/Task/tests/TaskAction.test.js \

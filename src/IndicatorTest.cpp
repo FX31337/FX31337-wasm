@@ -28,7 +28,7 @@
 #include <emscripten/emscripten.h>
 #endif
 #define __debug__
-#define __debug_verbose__
+//#define __debug_verbose__
 
 // Local includes.
 #include "classes/Indicator/Indicator.h"
@@ -39,29 +39,65 @@
 #include "classes/Platform.h"
 #include "classes/Tick/Tick.struct.h"
 
+#define INDICATOR_TEST_SYMBOL "EURUSD"
+#define INDICATOR_TEST_TIMEFRAME PERIOD_M1
+
 class IndicatorTest {
   static Indicators indis;
 
  public:
   IndicatorTest() {}
 
-  static void Add(IndicatorData *_indi) {
+  static void Add(IndicatorData *_indi, string _symbol, ENUM_TIMEFRAMES _tf) {
     indis.Add(_indi);
 
-    Platform::AddWithDefaultBindings(_indi, _Symbol, PERIOD_CURRENT);
+    Platform::AddWithDefaultBindings(_indi, _symbol, _tf);
+
+    Indi_TickProvider *_tick_provider = dynamic_cast<Indi_TickProvider *>(Platform::FetchDefaultTickIndicator(_symbol));
+
+    if (_tick_provider != nullptr && _tick_provider PTR_DEREF BufferSize() == 0) {
+      FeedTickProvider(_tick_provider, _symbol);
+    }
+  }
+
+  static void FeedTickProvider(Indi_TickProvider *_tick_provider, string _symbol) {
+    // We'd like to have reproducible ticks.
+    srand(230);
+
+    PrintFormat("Feeding Tick Provider for symbol %s...", C_STR(_symbol));
+    ARRAY(TickTAB<double>, _ticks);
+
+    datetime _dt = Platform::Timestamp();
+
+    double _curr_ask = 1.0;
+    double _curr_bid = 1.2;
+
+    for (int i = 0; i < 100; ++i) {
+      if (i % 10 == 0) srand(i);
+
+      double _bit = 0.1;
+      double _sign = ((rand() % RAND_MAX) < RAND_MAX / 2) ? -1 : 1;
+
+      Print(_sign);
+
+      _curr_ask += _bit * _sign;
+      _curr_bid += _bit * _sign;
+      // One tick per 20s. 3 ticks in a minute.
+      ArrayPush(_ticks, TickTAB<double>((_dt + i) * 1000 * 20, _curr_ask, _curr_bid));
+    }
+
+    _tick_provider PTR_DEREF Feed(_ticks);
   }
 
   static void Init() {
+    Platform::Init();
+
     indis.Clear();
 
     // Relative Strength Index (RSI).
-    IndiRSIParams rsi_params(14, PRICE_OPEN);
-    Ref<IndicatorData> indi_rsi = new Indi_RSI(rsi_params);
-    Add(indi_rsi.Ptr());
-
-    for (int i = 0; i < indis.Size(); ++i) {
-      Platform::AddWithDefaultBindings(indis[i], _Symbol, PERIOD_CURRENT);
-    }
+    IndiRSIParams rsi_params(10, PRICE_OPEN);
+    Ref<IndicatorData> indi_rsi = new Indi_RSI(rsi_params, IDATA_INDICATOR);
+    Add(indi_rsi.Ptr(), INDICATOR_TEST_SYMBOL, INDICATOR_TEST_TIMEFRAME);
   }
 
   static void Run() {
@@ -78,11 +114,15 @@ class IndicatorTest {
       return false;
     }
 
-    Print("Tick processed.");
+    IndicatorData *_candles = Platform::FetchDefaultCandleIndicator(INDICATOR_TEST_SYMBOL, INDICATOR_TEST_TIMEFRAME);
 
-    IndicatorData *_candles = Platform::FetchDefaultCandleIndicator(_Symbol, PERIOD_CURRENT);
+    Print("Tick processed. Current OHLC = ", C_STR(_candles PTR_DEREF GetOHLC().ToCSV()));
 
     if (_candles PTR_DEREF IsNewBar()) {
+      Print("");
+      Print("[ IT WAS NEW BAR ]");
+      Print("");
+
       for (int i = 0; i < indis.Size(); ++i) {
         IndicatorData *_indi = indis[i];
 
@@ -116,6 +156,13 @@ EMSCRIPTEN_BINDINGS(IndicatorTest) {
 
 int main(int argc, char **argv) {
   Platform::Init();
+
+#ifndef EMSCRIPTEN
+
+  IndicatorTest::Init();
+  IndicatorTest::Run();
+
+#endif
 
   Print("Hello World from Indicator test!");
   std::cout << "Hello from C++!" << std::endl;
