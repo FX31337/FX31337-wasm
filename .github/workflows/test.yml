@@ -1,0 +1,47 @@
+---
+name: Test
+
+# yamllint disable rule:truthy
+on:
+  pull_request:
+  push:
+
+jobs:
+  Compile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - uses: mymindstorm/setup-emsdk@v11
+        with:
+          version: 'latest'
+      - name: Verify emcc
+        run: emcc -v
+      - name: Build
+        run: npm run build
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist-files
+          path: dist
+  Test:
+    needs: Compile
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        testjs:
+          - IndicatorTest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 19.x
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: dist-files
+          path: dist
+      - run: ls -al
+      - run: ls -al dist
+      - run: node tests/js/${{ matrix.testjs }}.js

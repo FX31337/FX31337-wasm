@@ -78,8 +78,6 @@ class IndicatorTest {
       double _bit = 0.1;
       double _sign = ((rand() % RAND_MAX) < RAND_MAX / 2) ? -1 : 1;
 
-      Print(_sign);
-
       _curr_ask += _bit * _sign;
       _curr_bid += _bit * _sign;
       // One tick per 20s. 3 ticks in a minute.
@@ -150,6 +148,7 @@ EMSCRIPTEN_BINDINGS(IndicatorTest) {
   emscripten::class_<IndicatorTest>("IndicatorTest")
       .constructor<>()
       .class_function("Init", &IndicatorTest::Init)
+      .class_function("Tick", &IndicatorTest::Tick)
       .class_function("Run", &IndicatorTest::Run);
 }
 #endif

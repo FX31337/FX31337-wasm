@@ -2,7 +2,7 @@ CC=emcc
 CPPFLAGS=-g -std=c++17
 CWD=$(abspath $(lastword $(MAKEFILE_LIST)))
 CXX=gcc
-EMCC_CFLAGS=-s WASM=1 -s ENVIRONMENT=node -s EXIT_RUNTIME=0 -s NO_EXIT_RUNTIME=1 -s ASSERTIONS=1 -Wall -s MODULARIZE=1 -s ERROR_ON_UNDEFINED_SYMBOLS=0 --bind -s EXPORTED_FUNCTIONS="[]"
+EMCC_CFLAGS=-s WASM=1 -s ENVIRONMENT=node -s WASM_BIGINT -s EXIT_RUNTIME=0 -s NO_EXIT_RUNTIME=1 -s ASSERTIONS=1 -Wall -s MODULARIZE=1 -s ERROR_ON_UNDEFINED_SYMBOLS=0 --bind -s EXPORTED_FUNCTIONS="[]"
 #OBJS=*.o *.html *.js *.wasm
 OBJS=.*\.\(obj\|wasm\)
 RM=find . \( -name "*.obj" -o -name "*.wasm" \) -type f -delete
@@ -13,7 +13,7 @@ RM=find . \( -name "*.obj" -o -name "*.wasm" \) -type f -delete
 #compile: TradeSignalManager.o TradeSignalManager.js
 compile: \
 	IndicatorTest.o IndicatorTest.js \
-#	TaskRunner.o TaskRunner.js \
+	TaskRunner.o TaskRunner.js \
 	classes/Task/tests/Task.test.o classes/Task/tests/Task.test.js \
 	classes/Task/tests/Taskable.test.o classes/Task/tests/Taskable.test.js \
 	classes/Task/tests/TaskAction.test.o classes/Task/tests/TaskAction.test.js \
