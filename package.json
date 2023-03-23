@@ -11,16 +11,29 @@
     }
   ],
   "devDependencies": {
-    "http-server": "^14.1.1"
+    "@babel/cli": "^7.21.0",
+    "@babel/core": "^7.21.3",
+    "@babel/plugin-external-helpers": "^7.18.6",
+    "@babel/plugin-transform-runtime": "^7.21.0",
+    "@babel/preset-env": "^7.20.2",
+    "@babel/preset-flow": "^7.18.6",
+    "@rollup/plugin-alias": "^4.0.3",
+    "babelrc-rollup": "^3.0.0",
+    "http-server": "^14.1.1",
+    "rollup": "^3.19.1",
+    "rollup-plugin-babel": "^4.4.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-typescript": "^1.0.1",
+    "tslib": "^2.5.0",
+    "typescript": "^4.9.5"
   },
   "files": [
-    "dist/TaskRunner.js",
-    "dist/TaskRunner.wasm",
-    "dist/TradeSignalManager.js",
-    "dist/TradeSignalManager.wasm"
+    "index.js",
+    "dist"
   ],
   "homepage": "https://github.com/FX31337/FX31337-wasm#readme",
   "main": "index.js",
+  "module": "index.js",
   "name": "fx31337-wasm",
   "repository": {
     "type": "git",
@@ -28,6 +41,7 @@
   },
   "scripts": {
     "build": "make -C src",
+    "build-lib": "./node_modules/.bin/rollup -c",
     "clean": "make -C src clean",
     "postbuild": "find src \\( -name '*.obj' -o -name '*.wasm' -o -name '*.js' \\) -type f -exec mv -v {} dist/ \\;",
     "rebuild": "npm run clean; npm run build",
@@ -41,5 +55,8 @@
     "trading"
   ],
   "license": "GPL-3.0-or-later",
-  "version": "0.1.4"
+  "version": "0.1.32",
+  "dependencies": {
+    "core-js": "^3.29.1"
+  }
 }

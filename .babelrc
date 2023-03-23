@@ -1,0 +1,33 @@
+{
+  "env": {
+    "test": {
+      "presets": [
+        [
+          "@babel/preset-env",
+          {
+            "modules": "umd",
+            "targets": {
+              "browsers": [
+                "last 2 versions"
+              ]
+            },
+            "useBuiltIns": "usage"
+          }
+        ],
+        [
+          "@babel/preset-flow",
+          {
+            "modules": "umd"
+          }
+        ]
+      ]
+    }
+  },
+  "plugins": [
+    "@babel/plugin-external-helpers",
+    "@babel/plugin-transform-flow-strip-types",
+    "@babel/plugin-proposal-class-properties",
+    "@babel/plugin-transform-runtime",
+    "@babel/plugin-syntax-object-rest-spread"
+  ]
+}
