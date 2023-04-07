@@ -55,7 +55,7 @@
     "trading"
   ],
   "license": "GPL-3.0-or-later",
-  "version": "0.1.32",
+  "version": "0.1.36",
   "dependencies": {
     "core-js": "^3.29.1"
   }

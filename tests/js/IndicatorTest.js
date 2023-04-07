@@ -1,8 +1,13 @@
+const contentWASM = require('../../dist/IndicatorTest.wasm');
+
+console.log (contentWASM);
+
 const Runner = require('../../lib/Runner.js');
 
 class Test extends Runner.Test {
   run(lib) {
     const tickProvider = new lib.Indi_TickProvider();
+
 
     // console.log(lib);
 

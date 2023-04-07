@@ -42,11 +42,47 @@
 #define INDICATOR_TEST_SYMBOL "EURUSD"
 #define INDICATOR_TEST_TIMEFRAME PERIOD_M1
 
+ /*
+
+  Example in JS:
+
+  const tester = new lib.Tester('EURUSD', lib.timeframes.M5);
+  const ticks  = new lib.indicators.TickProvider();
+  const rsi    = new lib.indicators.RSI(13);
+
+  tester.Add(rsi);
+
+  // Note that all timeframes shares the same ticks and so you may reuse single
+  // TickProvider indicator for other Tester instances for the same symbols pair.
+  ticks.Add([
+    {timestamp: ..., ask: ..., bid: ...},
+    {timestamp: ..., ask: ..., bid: ...}
+  ]);
+
+  // You can also use tester.RunTick() method in a loop or if you're sure that
+  // new tick arrived.
+  tester.RunAllTicks();
+
+  for (let indicator of tester.GetIndicatorsInfo()) {
+    console.log(`Indicator ${indicator.name}'s has completed. `)
+  }
+
+ */
+
+struct TestIndicatorInfo {
+  // Name of the indicator.
+  string name;
+
+  // Time-frame.
+  ENUM_TIMEFRAMES tf;
+};
+
 class IndicatorTest {
   static Indicators indis;
 
  public:
-  IndicatorTest() {}
+  IndicatorTest() {
+  }
 
   static void Add(IndicatorData *_indi, string _symbol, ENUM_TIMEFRAMES _tf) {
     indis.Add(_indi);
@@ -137,6 +173,13 @@ class IndicatorTest {
 
     return true;
   }
+
+  /**
+   * Retrieves information about indicators attached for testing.
+   */
+  static ARRAY_TYPE(TestIndicatorInfo) GetIndicatorsInfo() {
+
+  }
 };
 
 Indicators IndicatorTest::indis;
@@ -147,9 +190,9 @@ Indicators IndicatorTest::indis;
 EMSCRIPTEN_BINDINGS(IndicatorTest) {
   emscripten::class_<IndicatorTest>("IndicatorTest")
       .constructor<>()
-      .class_function("Init", &IndicatorTest::Init)
-      .class_function("Tick", &IndicatorTest::Tick)
-      .class_function("Run", &IndicatorTest::Run);
+      .function("Init", &IndicatorTest::Init)
+      .function("Tick", &IndicatorTest::Tick)
+      .function("Run", &IndicatorTest::Run);
 }
 #endif
 
