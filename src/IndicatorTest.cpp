@@ -31,6 +31,8 @@
 //#define __debug_verbose__
 
 // Local includes.
+#include "classes/Chart.enum.h"
+#include "classes/DictStruct.mqh"
 #include "classes/Indicator/Indicator.h"
 #include "classes/Indicator/tests/classes/IndicatorTfDummy.h"
 #include "classes/Indicator/tests/classes/Indicators.h"
@@ -42,65 +44,100 @@
 #define INDICATOR_TEST_SYMBOL "EURUSD"
 #define INDICATOR_TEST_TIMEFRAME PERIOD_M1
 
- /*
+/*
 
-  Example in JS:
+ Example in JS:
 
-  const tester = new lib.Tester('EURUSD', lib.timeframes.M5);
-  const ticks  = new lib.indicators.TickProvider();
-  const rsi    = new lib.indicators.RSI(13);
+ const tester = new lib.Tester('EURUSD', lib.timeframes.M5);
+ const ticks  = new lib.indicators.TickProvider();
+ const rsi    = new lib.indicators.RSI(13);
 
-  tester.Add(rsi);
+ tester.Add(rsi);
 
-  // Note that all timeframes shares the same ticks and so you may reuse single
-  // TickProvider indicator for other Tester instances for the same symbols pair.
-  ticks.Add([
-    {timestamp: ..., ask: ..., bid: ...},
-    {timestamp: ..., ask: ..., bid: ...}
-  ]);
+ // Note that all timeframes shares the same ticks and so you may reuse single
+ // TickProvider indicator for other Tester instances for the same symbols pair.
+ ticks.Add([
+   {timestamp: ..., ask: ..., bid: ...},
+   {timestamp: ..., ask: ..., bid: ...}
+ ]);
 
-  // You can also use tester.RunTick() method in a loop or if you're sure that
-  // new tick arrived.
-  tester.RunAllTicks();
+ // You can also use tester.RunTick() method in a loop or if you're sure that
+ // new tick arrived.
+ tester.RunAllTicks();
 
-  for (let indicator of tester.GetIndicatorsInfo()) {
-    console.log(`Indicator ${indicator.name}'s has completed. `)
-  }
+ for (let indicator of tester.GetIndicatorsInfo()) {
+   console.log(`Indicator ${indicator.name}'s has completed. `)
+ }
 
+*/
+
+/**
+ * Details about given indicator. Retrieved from Tester class.
+ *
+ * We can later user Tester::GetIndicatorData(int indi_index, int abs_shift, int mode = 0) to retrieve data from the
+ * indicator.
  */
-
 struct TestIndicatorInfo {
   // Name of the indicator.
   string name;
 
-  // Time-frame.
+  // Index of the indicator in the Platform.
+  int index;
+
+  // Number of values calculated for this indicator.
+  int num_values;
+
+  // Symbol pair indicator works on.
+  string symbol;
+
+  // Time-frame indicator works on.
   ENUM_TIMEFRAMES tf;
 };
 
-class IndicatorTest {
-  static Indicators indis;
-
+class Tester {
  public:
-  IndicatorTest() {
-  }
+  /**
+   * Constructor.
+   */
+  Tester() {}
 
-  static void Add(IndicatorData *_indi, string _symbol, ENUM_TIMEFRAMES _tf) {
-    indis.Add(_indi);
+  /**
+   * Adds indicator which must previously set its candle/tick sources in order
+   * to work.
+   */
+  static void Add(Ref<IndicatorData> _indi) { Platform::Add(_indi.Ptr()); }
 
-    Platform::AddWithDefaultBindings(_indi, _symbol, _tf);
+  /**
+   * Adds indicator using given symbol and timeframe. Uses default Tf and Tick
+   * indicator for current platform. Under C++/Emscripten default Tick
+   * indicator is TickProvider. Note that you must feed TickProvider for each
+   * symbol used.
+   *
+   * In JS you may retrieve default tick indicator via:
+   * lib.Tester.GetDefaultTickIndicator(symbol: string).
+   * The same with default candle indicator:
+   * lib.Tester.GetDefaultCandleIndicator(symbol: string, tf: lib.timeframes[tf]).
+   */
+  static void AddPlatformWise(Ref<IndicatorData> _indi, string _symbol, ENUM_TIMEFRAMES _tf) {
+    Platform::AddWithDefaultBindings(_indi.Ptr(), _symbol, _tf);
 
     Indi_TickProvider *_tick_provider = dynamic_cast<Indi_TickProvider *>(Platform::FetchDefaultTickIndicator(_symbol));
 
+    // Feeding with random ticks only if tick provider is empty.
+    // @todo Should be moved to Tester::FeedTickProvidersWithRandomTicks() or somewhere else.
     if (_tick_provider != nullptr && _tick_provider PTR_DEREF BufferSize() == 0) {
-      FeedTickProvider(_tick_provider, _symbol);
+      FeedTickProvider(_tick_provider);
     }
   }
 
-  static void FeedTickProvider(Indi_TickProvider *_tick_provider, string _symbol) {
+  /**
+   * Helper function for feeding given tick provider with some random ticks.
+   **/
+  static void FeedTickProvider(Ref<Indi_TickProvider> _tick_provider) {
     // We'd like to have reproducible ticks.
     srand(230);
 
-    PrintFormat("Feeding Tick Provider for symbol %s...", C_STR(_symbol));
+    Print("Feeding Tick Provider with random values...");
     ARRAY(TickTAB<double>, _ticks);
 
     datetime _dt = Platform::Timestamp();
@@ -120,27 +157,32 @@ class IndicatorTest {
       ArrayPush(_ticks, TickTAB<double>((_dt + i) * 1000 * 20, _curr_ask, _curr_bid));
     }
 
-    _tick_provider PTR_DEREF Feed(_ticks);
+    _tick_provider REF_DEREF Feed(_ticks);
   }
 
   static void Init() {
     Platform::Init();
 
-    indis.Clear();
-
     // Relative Strength Index (RSI).
-    IndiRSIParams rsi_params(10, PRICE_OPEN);
-    Ref<IndicatorData> indi_rsi = new Indi_RSI(rsi_params, IDATA_INDICATOR);
-    Add(indi_rsi.Ptr(), INDICATOR_TEST_SYMBOL, INDICATOR_TEST_TIMEFRAME);
+    // IndiRSIParams rsi_params(10, PRICE_OPEN);
+    // Ref<IndicatorData> indi_rsi = new Indi_RSI(rsi_params, IDATA_INDICATOR);
+    // AddPlatformWise(indi_rsi.Ptr(), INDICATOR_TEST_SYMBOL, INDICATOR_TEST_TIMEFRAME);
   }
 
-  static void Run() {
-    while (Tick()) {
+  /**
+   * Runs all ticks. Stops thread until all ticks are processed.
+   */
+  static void RunAllTicks() {
+    while (RunTick()) {
       // Ticking all ticks.
     }
   }
 
-  static bool Tick() {
+  /**
+   * Runs a single tick. Returns false if there's no more ticks to process (all
+   * tick indicators said there will be no more ticks).
+   */
+  static bool RunTick() {
     Platform::Tick();
 
     if (!Platform::HadTick()) {
@@ -148,6 +190,24 @@ class IndicatorTest {
       return false;
     }
 
+    return true;
+  }
+
+  /**
+   * Returns list of indicators added for testing.
+   */
+  static ARRAY_TYPE(Ref<IndicatorData>) GetIndicators() {
+    ARRAY(Ref<IndicatorData>, _indis);
+
+    for (DictStructIterator<long, Ref<IndicatorData>> iter = Platform::GetIndicators() PTR_DEREF Begin();
+         iter.IsValid(); ++iter) {
+      ArrayPush(_indis, iter.Value());
+    }
+
+    return _indis;
+  }
+
+  /*
     IndicatorData *_candles = Platform::FetchDefaultCandleIndicator(INDICATOR_TEST_SYMBOL, INDICATOR_TEST_TIMEFRAME);
 
     Print("Tick processed. Current OHLC = ", C_STR(_candles PTR_DEREF GetOHLC().ToCSV()));
@@ -174,37 +234,28 @@ class IndicatorTest {
     return true;
   }
 
-  /**
-   * Retrieves information about indicators attached for testing.
-   */
-  static ARRAY_TYPE(TestIndicatorInfo) GetIndicatorsInfo() {
-
-  }
+  */
 };
-
-Indicators IndicatorTest::indis;
 
 #ifdef EMSCRIPTEN
 #include <emscripten/bind.h>
 
-EMSCRIPTEN_BINDINGS(IndicatorTest) {
-  emscripten::class_<IndicatorTest>("IndicatorTest")
+EMSCRIPTEN_BINDINGS(Tester) {
+  emscripten::class_<Tester>("Tester")
       .constructor<>()
-      .function("Init", &IndicatorTest::Init)
-      .function("Tick", &IndicatorTest::Tick)
-      .function("Run", &IndicatorTest::Run);
+      .class_function("Init", &Tester::Init)
+      .class_function("Add", &Tester::Add)
+      .class_function("AddPlatformWise", &Tester::AddPlatformWise)
+      .class_function("RunAllTicks", &Tester::RunAllTicks)
+      .class_function("RunTick", &Tester::RunTick);
 }
+
+REGISTER_ARRAY_OF(ArrayIndicatorData, Ref<IndicatorData>, "IndicatorDataArray");
+
 #endif
 
 int main(int argc, char **argv) {
-  Platform::Init();
-
-#ifndef EMSCRIPTEN
-
-  IndicatorTest::Init();
-  IndicatorTest::Run();
-
-#endif
+  // Tester::Init();
 
   Print("Hello World from Indicator test!");
   std::cout << "Hello from C++!" << std::endl;

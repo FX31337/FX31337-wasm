@@ -1,48 +1,35 @@
-const contentWASM = require('../../dist/IndicatorTest.wasm');
+const fs = require('fs');
 
-console.log (contentWASM);
+const contentJs = require('./../../dist/IndicatorTest');
+const contentWasm = 'dist/IndicatorTest.wasm';
 
-const Runner = require('../../lib/Runner.js');
+const lib = require('../../index.js');
 
-class Test extends Runner.Test {
+class Test extends lib.Test {
   run(lib) {
-    const tickProvider = new lib.Indi_TickProvider();
+    const ticker = new lib.indicators.TickProvider();
 
+    console.log (lib.indicators);
 
-    // console.log(lib);
+    const tfM5 = new lib.indicators.Tf(lib.timeframes.M5);
+    tfM5.SetSource(ticker);
 
-    const tick1 = new lib.TickTAB();
-    const tick2 = new lib.TickTAB();
-    const tick3 = new lib.TickTAB();
+    const rsiM5 = new lib.indicators.RSI(13);
+    rsiM5.SetSource(tfM5);
 
-    tick1.time_ms = BigInt(0);
-    tick1.ask = 1.0;
-    tick1.bid = 1.1;
+    lib.Tester.Add(rsiM5);
 
-    tick2.time_ms = BigInt(100);
-    tick2.ask = 1.1;
-    tick2.bid = 1.2;
+    // Note that all timeframes shares the same ticks and so you may reuse single TickProvider indicator for other Tester instances for the same symbols pair.
+    /*
+    ticks.Add([
+      {timestamp: ..., ask: ..., bid: ...},
+      {timestamp: ..., ask: ..., bid: ...}
+    ]);
+    */
 
-    tick3.time_ms = BigInt(250);
-    tick3.ask = 1.2;
-    tick3.bid = 1.3;
-
-    const ticks = new lib.TickTABArray();
-
-    ticks.Push(tick1);
-    ticks.Push(tick2);
-    ticks.Push(tick3);
-
-    console.log(`There are: ${ticks.Size()} ticks added.`);
-    console.log(`There was: ${tickProvider.BufferSize()} ticks in TickProvider buffer.`);
-
-    tickProvider.Feed(ticks);
-
-    console.log(`There are: ${tickProvider.BufferSize()} ticks in TickProvider buffer.`);
-
-    lib.IndicatorTest.Init();
-    lib.IndicatorTest.Run();
+    // You can also use tester.RunTick() method in a loop or if you're sure that new tick arrived.
+    lib.Tester.RunAllTicks();
   }
 }
 
-Runner.run(Test, 'IndicatorTest');
+lib.run(Test, contentJs, contentWasm);

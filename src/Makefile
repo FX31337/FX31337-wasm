@@ -2,7 +2,7 @@ CC=emcc
 CPPFLAGS=-g -std=c++17
 CWD=$(abspath $(lastword $(MAKEFILE_LIST)))
 CXX=gcc
-EMCC_CFLAGS=-s WASM=1 -s ENVIRONMENT=web -s WASM_BIGINT -s EXIT_RUNTIME=0 -s NO_EXIT_RUNTIME=1 -s ASSERTIONS=1 -Wall -s MODULARIZE=1 -s ERROR_ON_UNDEFINED_SYMBOLS=0 --bind -s EXPORTED_FUNCTIONS="[]"
+EMCC_CFLAGS=-s WASM=1 -s ENVIRONMENT=web,node -s WASM_BIGINT -s EXIT_RUNTIME=0 -s NO_EXIT_RUNTIME=1 -s ASSERTIONS=1 -Wall -s MODULARIZE=1 -s ERROR_ON_UNDEFINED_SYMBOLS=0 --bind -s EXPORTED_FUNCTIONS="[]"
 #OBJS=*.o *.html *.js *.wasm
 OBJS=.*\.\(obj\|wasm\)
 RM=find . \( -name "*.o"  -o -name "*.obj" -o -name "*.wasm" -o -name "*.js" \) -type f -delete
