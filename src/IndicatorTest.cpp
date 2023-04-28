@@ -28,6 +28,8 @@
 #include <emscripten/emscripten.h>
 #endif
 #define __debug__
+#define __debug_indicator__
+//#define __debug_emscripten__
 //#define __debug_verbose__
 
 // Local includes.
@@ -105,7 +107,7 @@ class Tester {
    * Adds indicator which must previously set its candle/tick sources in order
    * to work.
    */
-  static void Add(Ref<IndicatorData> _indi) { Platform::Add(_indi.Ptr()); }
+  static void Add(IndicatorData *_indi) { Platform::Add(_indi); }
 
   /**
    * Adds indicator using given symbol and timeframe. Uses default Tf and Tick
@@ -158,6 +160,8 @@ class Tester {
     }
 
     _tick_provider REF_DEREF Feed(_ticks);
+
+    Print("Given Tick Provider has now ", _tick_provider REF_DEREF BufferSize(), " random values.");
   }
 
   static void Init() {
@@ -184,6 +188,23 @@ class Tester {
    */
   static bool RunTick() {
     Platform::Tick();
+
+    for (DictStructIterator<long, Ref<IndicatorData>> _iter = Platform::GetIndicators() PTR_DEREF Begin();
+         _iter.IsValid(); ++_iter) {
+      if (_iter.Value() REF_DEREF IsCandleIndicator() || _iter.Value() REF_DEREF IsTickIndicator()) {
+        // We don't need values of candle or tick indicators.
+        continue;
+      }
+
+      // Forcing indicator to calculate its value for the current tick.
+      IndicatorDataEntry _entry = _iter.Value() REF_DEREF GetEntry();
+
+      if (_entry.IsValid()) {
+        Print(_iter.Value() REF_DEREF GetFullName(), "'s value: ", _entry.ToCSV<double>());
+      } else {
+        Print(_iter.Value() REF_DEREF GetFullName(), " requires more ticks.");
+      }
+    }
 
     if (!Platform::HadTick()) {
       Print("There are no new ticks to process.");
@@ -244,10 +265,12 @@ EMSCRIPTEN_BINDINGS(Tester) {
   emscripten::class_<Tester>("Tester")
       .constructor<>()
       .class_function("Init", &Tester::Init)
-      .class_function("Add", &Tester::Add)
+      .class_function("Add", &Tester::Add, emscripten::allow_raw_pointer<emscripten::arg<0>>())
       .class_function("AddPlatformWise", &Tester::AddPlatformWise)
       .class_function("RunAllTicks", &Tester::RunAllTicks)
-      .class_function("RunTick", &Tester::RunTick);
+      .class_function("RunTick", &Tester::RunTick)
+      .class_function("FeedTickProvider", &Tester::FeedTickProvider,
+                      emscripten::allow_raw_pointer<emscripten::arg<0>>());
 }
 
 REGISTER_ARRAY_OF(ArrayIndicatorData, Ref<IndicatorData>, "IndicatorDataArray");
@@ -255,9 +278,35 @@ REGISTER_ARRAY_OF(ArrayIndicatorData, Ref<IndicatorData>, "IndicatorDataArray");
 #endif
 
 int main(int argc, char **argv) {
-  // Tester::Init();
+#ifdef __debug_emscripten__
 
-  Print("Hello World from Indicator test!");
-  std::cout << "Hello from C++!" << std::endl;
+  Indi_TickProviderParams ticker_params;
+  ticker_params.symbol = "EURUSD";
+  Ref<Indi_TickProvider> ticker = new Indi_TickProvider(ticker_params);
+
+  Ref<IndicatorTfDummy> tfM5 = new IndicatorTfDummy(PERIOD_M1);
+  tfM5 REF_DEREF SetDataSource(ticker.Ptr());
+
+  IndiRSIParams rsiM5_params(13, PRICE_OPEN, 0);
+  Ref<Indi_RSI> rsiM5 = new Indi_RSI(rsiM5_params);
+  rsiM5 REF_DEREF SetDataSource(tfM5.Ptr());
+
+  Tester::Add(rsiM5.Ptr());
+
+  // Note that all timeframes shares the same ticks and so you may reuse single TickProvider indicator for other Tester
+  // instances for the same symbols pair.
+
+  ARRAY(TickTAB<double>, ticks);
+
+  ArrayPush(ticks, TickTAB<double>(1000 * 1, 0.1, 0.11));
+  ArrayPush(ticks, TickTAB<double>(1000 * 60, 0.2, 0.22));
+  ArrayPush(ticks, TickTAB<double>(1000 * 120, 0.3, 0.33));
+
+  ticker REF_DEREF Feed(ticks);
+
+  Tester::RunAllTicks();
+
+#endif
+
   return 0;
 }

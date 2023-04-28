@@ -6622,6 +6622,8 @@ var asm = createWasm();
 /** @type {function(...*):?} */
 var ___wasm_call_ctors = createExportWrapper("__wasm_call_ctors");
 /** @type {function(...*):?} */
+var _malloc = createExportWrapper("malloc");
+/** @type {function(...*):?} */
 var ___getTypeName = Module["___getTypeName"] = createExportWrapper("__getTypeName");
 /** @type {function(...*):?} */
 var __embind_initialize_bindings = Module["__embind_initialize_bindings"] = createExportWrapper("_embind_initialize_bindings");
@@ -6629,8 +6631,6 @@ var __embind_initialize_bindings = Module["__embind_initialize_bindings"] = crea
 var ___errno_location = createExportWrapper("__errno_location");
 /** @type {function(...*):?} */
 var _fflush = Module["_fflush"] = createExportWrapper("fflush");
-/** @type {function(...*):?} */
-var _malloc = createExportWrapper("malloc");
 /** @type {function(...*):?} */
 var _free = createExportWrapper("free");
 /** @type {function(...*):?} */
