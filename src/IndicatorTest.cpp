@@ -75,6 +75,30 @@
 */
 
 /**
+ * Parameters to pass into lib.Tester.GetValues(). Could be calculated by
+ * Tester::GetTimeByScrollAndZoom(float scroll, float zoom, int visible_intervals).
+ */
+struct TesterValuesFetchParams {
+  // Beginning range (inclusive) of the values to be returned.
+  int64 timeFromMs;
+
+  // Ending range (inclusive) of the values to be returned.
+  int64 timeToMs;
+
+  // Width of the single column in structure retrieved from Tester::GetValues(). If more that one value fits the column,
+  // values will be aggregated (min/max values will be generated).
+  int timeStepSecs;
+
+  /**
+   * Returns string representation of the structure.
+   */
+  string ToString() {
+    return "{ timeFromMs: " + IntegerToString(timeFromMs) + ", timeToMs: " + IntegerToString(timeToMs) +
+           ", timeStepSecs: " + IntegerToString(timeStepSecs) + " }";
+  }
+};
+
+/**
  * Details about given indicator. Retrieved from Tester class.
  *
  * We can later user Tester::GetIndicatorData(int indi_index, int abs_shift, int mode = 0) to retrieve data from the
@@ -101,24 +125,132 @@ struct TestIndicatorInfo {
  * Single value for the TesterValuesColumn.
  */
 struct TesterValuesColumnValue {
-  // Indicator value.
-  double value;
-
   // Names of the indicator value.
   string name;
 
   // Type of the indicator value.
   ENUM_DATATYPE type;
+
+  // Time of the first added value.
+  int64 time_open_ms;
+
+  // Time of the last added value.
+  int64 time_close_ms;
+
+  // AGGREGATED VALUES:
+
+  // Value of the first added value.
+  double value_open;
+
+  // Highest added value.
+  double value_high;
+
+  // Lowest added value.
+  double value_low;
+
+  // Value of the last added value.
+  double value_close;
+
+  // Average of added values.
+  double value_avg;
+
+  // Number of values added (volume of the column).
+  int num_values;
+
+  /**
+   * Constructor.
+   **/
+  TesterValuesColumnValue(string _name = "", ENUM_DATATYPE _type = TYPE_DOUBLE, int64 _time_open_ms = 0,
+                          int64 _time_close_ms = 0, double _open = 0, double _high = 0, double _low = 0,
+                          double _close = 0, double _avg = 0, int _num_values = 0) {
+    name = _name;
+    type = _type;
+    time_open_ms = _time_open_ms;
+    time_close_ms = _time_close_ms;
+    value_open = _open;
+    value_high = _high;
+    value_low = _low;
+    value_close = _close;
+    value_avg = _avg;
+    num_values = _num_values;
+  }
+
+  /**
+   * Adds value to the column.
+   **/
+  void Add(double _value, int64 _time_ms) {
+    if (num_values == 0) {
+      // Adding first value to the column.
+      time_open_ms = time_close_ms = _time_ms;
+      value_open = value_high = value_low = value_close = value_avg = _value;
+    } else {
+      // Adding another value to the column.
+      if (_time_ms < time_open_ms) {
+        time_open_ms = _time_ms;
+        value_open = _value;
+      }
+      if (_time_ms > time_close_ms) {
+        time_close_ms = _time_ms;
+        value_close = _value;
+      }
+      value_high = MathMax(value_high, _value);
+      value_low = MathMax(value_low, _value);
+      value_avg = ((value_avg * num_values) + _value) / (num_values + 1);
+    }
+
+    ++num_values;
+  }
+
+  /**
+   * Returns string representation of the structure.
+   */
+  string ToString(int _indent = 0) {
+    string _out, _padding;
+    StringInit(_padding, _indent, ' ');
+    _out += _padding + "{  name: \"" + name + "\", type: " + EnumToString(type) +
+            ", open: " + DoubleToString(value_open) + ", high: " + DoubleToString(value_high) +
+            ", low: " + DoubleToString(value_low) + ", close: " + DoubleToString(value_close) +
+            ", avg: " + DoubleToString(value_avg) + " }";
+    return _out;
+  }
 };
 
 /**
- * Chart column data. A part of TesterValues items array;
+ * Chart column data. A part of TesterValues items array.
  */
 struct TesterValuesColumn {
   // Time in ms of data in the the column.
   int64 time_ms;
 
+  // List of values for each indicator.
   ARRAY(TesterValuesColumnValue, values);
+
+  /**
+   * Constructor.
+   **/
+  TesterValuesColumn(int64 _time_ms = 0) : time_ms(_time_ms) {}
+
+  /**
+   * Returns string representation of the structure.
+   */
+  string ToString(int _indent = 0) {
+    int i;
+    string _out, _padding_outer, _padding_inner;
+    StringInit(_padding_outer, _indent, ' ');
+    StringInit(_padding_inner, _indent + 2, ' ');
+
+    _out += _padding_outer + "{\n";
+    _out += _padding_inner + "time_ms: " + IntegerToString(time_ms) + ",\n";
+    _out += _padding_inner + "values: [\n";
+
+    for (i = 0; i < ArraySize(values); ++i) {
+      _out += values[i].ToString(_indent + 4) + "\n";
+    }
+
+    _out += _padding_inner + "]\n";
+    _out += _padding_outer + "}";
+    return _out;
+  }
 };
 
 /**
@@ -130,6 +262,34 @@ struct TesterValues {
 
   // Values that don't fit passed timeStep.
   ARRAY(TesterValuesColumn, loose);
+
+  /**
+   * Returns string representation of the structure.
+   */
+  string ToString(int _indent = 0) {
+    int i;
+    string _out, _padding_outer, _padding_inner;
+    StringInit(_padding_outer, _indent, ' ');
+    StringInit(_padding_inner, _indent + 2, ' ');
+
+    _out += _padding_outer + "{\n";
+    _out += _padding_inner + "timestep_based: [\n";
+
+    for (i = 0; i < ArraySize(timestep_based); ++i) {
+      _out += timestep_based[i].ToString(_indent + 4) + "\n";
+    }
+
+    _out += _padding_inner + "],\n";
+    _out += _padding_inner + "loose: [\n";
+
+    for (i = 0; i < ArraySize(loose); ++i) {
+      _out += loose[i].ToString(_indent + 4) + "\n";
+    }
+
+    _out += _padding_inner + "]\n";
+    _out += _padding_outer + "}";
+    return _out;
+  }
 };
 
 class Tester {
@@ -171,12 +331,24 @@ class Tester {
   /**
    * Calculates "timeFromMs", "timeToMs" and "timeStepSecs" parameters to directly pass them into
    * lib.Tester.GetValues(). Scroll 0.0f = Time for a value of absolute index 0. When Zoom is 1, Scroll determines
-   * number of minutes to retrieve. Efective absolute index is: GetIndexByTimeMs(MinuteMs / zoom * scroll).
+   * number of minutes to retrieve. Effective absolute index is: GetIndexByTimeMs(MinuteMs / zoom * scroll).
    */
-  /*/
-  static TesterValuesFetchParams GetTimeByScrollAndZoom(float scroll, float zoom) {
+  static TesterValuesFetchParams GetTimeByScrollAndZoom(float scroll, float zoom, int visible_intervals) {
+    // Base interval for zoom 1 is 1 minute. Zoom 2 means 60s / 2, i.e., 30s.
+    // Essentialy the interval is: 1 minute / zoom.
+    TesterValuesFetchParams result;
+    result.timeFromMs = 60000.0 * scroll * zoom;
+    result.timeToMs = 60000.0 * (scroll * visible_intervals) * zoom;
+    result.timeStepSecs = (int)(60.0f / zoom);
+    return result;
   }
-  */
+
+  /**
+   * @see Tester::GetValues(int64 _timeFromMs...) below.
+   **/
+  static TesterValues GetValues(const TesterValuesFetchParams &params, bool _aggregateNoFits = true) {
+    return GetValues(params.timeFromMs, params.timeToMs, params.timeStepSecs, _aggregateNoFits);
+  }
 
   /**
    * Retrieves chunk of values that fits and don't fit given timeStep, but are
@@ -188,8 +360,7 @@ class Tester {
    * the given number of seconds. timeFrom and timeTo parameters is a
    * time-range in ms (BigInt type).
    */
-  static TesterValues GetValues(datetime _timeFromMs, datetime _timeToMs, int _timeStepSecs,
-                                bool _aggregateNoFits = true) {
+  static TesterValues GetValues(int64 _timeFromMs, int64 _timeToMs, int _timeStepSecs, bool _aggregateNoFits = true) {
     /*
       Pseudo-code:
 
@@ -230,7 +401,7 @@ class Tester {
     Print("Feeding Tick Provider with random values...");
     ARRAY(TickTAB<double>, _ticks);
 
-    datetime _dt = Platform::Timestamp();
+    int64 _dt = Platform::Timestamp();
 
     double _curr_ask = 1.0;
     double _curr_bid = 1.2;
@@ -349,6 +520,8 @@ class Tester {
 #ifdef EMSCRIPTEN
 #include <emscripten/bind.h>
 
+#include "IndicatorTest.h"
+
 EMSCRIPTEN_BINDINGS(Tester) {
   emscripten::class_<Tester>("Tester")
       .constructor<>()
@@ -359,18 +532,27 @@ EMSCRIPTEN_BINDINGS(Tester) {
       .class_function("RunTick", &Tester::RunTick)
       .class_function("FeedTickProvider", &Tester::FeedTickProvider,
                       emscripten::allow_raw_pointer<emscripten::arg<0>>())
-      //.class_function("GetTimeByScrollAndZoom", &Tester::GetTimeByScrollAndZoom)
-      /*
+      .class_function("GetTimeByScrollAndZoom", &Tester::GetTimeByScrollAndZoom)
       .class_function(
           "GetValues", &Tester::GetValues,
           emscripten::optional_override([](int64 timeFromMs, int64 timeToMs, int timeStepSecs, bool aggregateNoFits) {
             return Tester::GetValues(timeFromMs, timeToMs, timeStepSecs, aggregateNoFits);
-          }))
-      */
-      ;
+          }));
 }
 
+// struct IndicatorData[]
 REGISTER_ARRAY_OF(ArrayIndicatorData, Ref<IndicatorData>, "IndicatorDataArray");
+
+// struct TesterValuesColumn[]
+REGISTER_ARRAY_OF(ArrayTesterValuesColumn, TesterValuesColumn, "TesterValuesColumnArray");
+
+// struct TesterValuesFetchParams
+EMSCRIPTEN_BINDINGS(TesterValuesFetchParams) {
+  emscripten::value_object<TesterValuesFetchParams>("TesterValuesFetchParams")
+      .field("timeFromMs", &TesterValuesFetchParams::timeFromMs)
+      .field("timeToMs", &TesterValuesFetchParams::timeFromMs)
+      .field("timeStepSecs", &TesterValuesFetchParams::timeStepSecs);
+}
 
 #endif
 
@@ -402,6 +584,34 @@ int main(int argc, char **argv) {
   ticker REF_DEREF Feed(ticks);
 
   Tester::RunAllTicks();
+
+  TesterValuesFetchParams getValuesParams = Tester::GetTimeByScrollAndZoom(0, 0, 32);
+
+  TesterValues values = Tester::GetValues(getValuesParams);
+
+  ArrayResize(values.timestep_based, 1);
+  values.timestep_based[0].time_ms = 5;
+  ArrayResize(values.timestep_based[0].values, 1);
+  values.timestep_based[0].values[0] = TesterValuesColumnValue("RSI (20)", TYPE_DOUBLE);
+  values.timestep_based[0].values[0].Add(0.224, 0);
+  values.timestep_based[0].values[0].Add(0.22, 1000);
+  values.timestep_based[0].values[0].Add(0.24, 2000);
+  values.timestep_based[0].values[0].Add(0.2254, 3000);
+  values.timestep_based[0].values[0].Add(0.2284, 4000);
+  values.timestep_based[0].values[0].Add(0.2214, 5000);
+  values.timestep_based[0].values[0].Add(0.2114, 6000);
+
+  ArrayResize(values.loose, 1);
+  ArrayResize(values.loose[0].values, 1);
+  values.loose[0].values[0] = TesterValuesColumnValue("RENKO (5)", TYPE_DOUBLE, 25, 28.21, 25, 26.3, 23, 24.4);
+
+  Print("Fetched values for params: ", getValuesParams.ToString());
+
+  Print("Values fetched:\n", values.ToString());
+
+#ifdef __cplusplus
+  std::system("PAUSE");
+#endif
 
 #endif
 
