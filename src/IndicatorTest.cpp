@@ -30,7 +30,7 @@
 #define __debug__
 #define __debug_indicator__
 #define __debug_emscripten__
-//#define __debug_verbose__
+#define __debug_verbose__
 
 // Local includes.
 #include "classes/Array.extern.h"
@@ -346,8 +346,8 @@ class Tester {
   /**
    * @see Tester::GetValues(int64 _timeFromMs...) below.
    **/
-  static TesterValues GetValues(const TesterValuesFetchParams &params, bool _aggregateNoFits = true) {
-    return GetValues(params.timeFromMs, params.timeToMs, params.timeStepSecs, _aggregateNoFits);
+  static TesterValues GetValues(const TesterValuesFetchParams &params, bool _aggregate_no_fits = true) {
+    return GetValues(params.timeFromMs, params.timeToMs, params.timeStepSecs, _aggregate_no_fits);
   }
 
   /**
@@ -360,7 +360,8 @@ class Tester {
    * the given number of seconds. timeFrom and timeTo parameters is a
    * time-range in ms (BigInt type).
    */
-  static TesterValues GetValues(int64 _timeFromMs, int64 _timeToMs, int _timeStepSecs, bool _aggregateNoFits = true) {
+  static TesterValues GetValues(int64 _time_from_ms, int64 _time_to_ms, int _time_step_secs,
+                                bool _aggregate_no_fits = true) {
     /*
       Pseudo-code:
 
@@ -387,7 +388,103 @@ class Tester {
       generated.
 
     */
+
     TesterValues values;
+
+    // Firstly, we need to know which indicators are TF-based and which aren't
+    // TF-based. Non TF-based indicators generates values whenever they want,
+    // so values from their shifts aren't generated in fixed intervals.
+    //
+    // All non TF-based indicators have INDI_FLAG_LOOSE_TF_CANDLE_INDICATOR
+    // flag set. Such flag have e.g., Renko indicator.
+
+    // Now we traverse indicators added to the Platform class via
+    // Tester::Add(...) or via Platform::Add...().
+
+    // First step is to calculate how much of those two types of indicators we
+    // have.
+
+    int _num_tf = 0, _num_loose_tf = 0;
+
+    for (DictStructIterator<long, Ref<IndicatorData>> _iter = Platform::GetIndicators() PTR_DEREF Begin();
+         _iter.IsValid(); ++_iter) {
+      IndicatorData *_indi = _iter.Value().Ptr();
+      if (_indi PTR_DEREF IsCandleIndicator() || _iter.Value() REF_DEREF IsTickIndicator()) {
+        // We don't need values of candle or tick indicators.
+        continue;
+      }
+
+      bool _is_loose_tf = (_indi PTR_DEREF GetFlags() & INDI_FLAG_LOOSE_TF_CANDLE_INDICATOR) != 0;
+
+      if (_is_loose_tf) {
+        ++_num_loose_tf;
+      } else {
+        ++_num_tf;
+      }
+    }
+
+    ArrayResize(values.timestep_based, _num_tf);
+    ArrayResize(values.loose, _num_loose_tf);
+
+    // Next step is to generate values for each type of indicators.
+
+    int _idx_tf = 0, _idx_loose_tf = 0;
+
+    for (DictStructIterator<long, Ref<IndicatorData>> _iter = Platform::GetIndicators() PTR_DEREF Begin();
+         _iter.IsValid(); ++_iter) {
+      IndicatorData *_indi = _iter.Value().Ptr();
+      if (_indi PTR_DEREF IsCandleIndicator() || _iter.Value() REF_DEREF IsTickIndicator()) {
+        // We don't need values of candle or tick indicators.
+        continue;
+      }
+
+      bool _is_loose_tf = (_indi PTR_DEREF GetFlags() & INDI_FLAG_LOOSE_TF_CANDLE_INDICATOR) != 0;
+
+      if (!_is_loose_tf) {
+        // It's a TF-based indicator (fixed interval).
+        // Such indicators are based on the assigned TF indicator and TF value
+        // will be retrieved from those TF indicators.
+        ENUM_TIMEFRAMES _tf = _indi PTR_DEREF GetTf();
+
+        // Time-frame length in miliseconds.
+        int64 _tf_ms = ((int64)ChartTf::TfToMs(_tf));
+
+        // Firstly, we round time range to the TF.
+        _time_from_ms = _time_from_ms % _tf_ms;
+
+        // We don't want to end at the start of the next time-frame, but just before it.
+        _time_to_ms = _time_to_ms % _tf_ms + (_tf_ms - 1);
+
+        // In order to get relative indices of values to retrieve, we calculate difference of current value's time
+        // (relative index 0) and rounded start time.
+        int64 _value_rel_0_time_ms = _indi PTR_DEREF GetBarTime(0);
+
+        // Note that starting index could be negative. That means that we want to retrieve future values.
+        int _value_index_from = (int)((_value_rel_0_time_ms - _time_from_ms) / _tf_ms);
+
+        // Note that ending index could be negative. That means that we want to retrieve future values.
+        int _value_index_to = (int)((_value_rel_0_time_ms - _time_to_ms) / _tf_ms);
+
+#ifdef __debug_verbose__
+        Print("Tester::GetValues(): Will aggregate values for TF ", EnumToString(_tf), ", relative indices from ",
+              _value_index_from, " to ", _value_index_to);
+#endif
+
+        if (_value_index_from < 0 || _value_index_to < 0) {
+          Alert("We don't yet support retrieving future values!");
+          DebugBreak();
+          return values;
+        }
+
+        // Now it's time to calculate
+
+      } else {
+        // It's a loose, i.e., non TF-based indicator (values are generated in
+        // a non-fixed interval and can we generated anytime). We just traverse
+        // values and try to retrieve values for a given time range.
+      }
+    }
+
     return values;
   }
 
