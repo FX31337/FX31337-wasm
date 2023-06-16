@@ -428,8 +428,6 @@ class Tester {
 
     // Next step is to generate values for each type of indicators.
 
-    int _idx_tf = 0, _idx_loose_tf = 0;
-
     for (DictStructIterator<long, Ref<IndicatorData>> _iter = Platform::GetIndicators() PTR_DEREF Begin();
          _iter.IsValid(); ++_iter) {
       IndicatorData *_indi = _iter.Value().Ptr();
@@ -616,8 +614,6 @@ class Tester {
 
 #ifdef EMSCRIPTEN
 #include <emscripten/bind.h>
-
-#include "IndicatorTest.h"
 
 EMSCRIPTEN_BINDINGS(Tester) {
   emscripten::class_<Tester>("Tester")
