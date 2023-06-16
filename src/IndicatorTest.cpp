@@ -695,7 +695,7 @@ int main(int argc, char **argv) {
 
   ArrayResize(values.loose, 1);
   ArrayResize(values.loose[0].values, 1);
-  values.loose[0].values[0] = TesterValuesColumnValue("RENKO (5)", TYPE_DOUBLE, 25, 28.21, 25, 26.3, 23, 24.4);
+  values.loose[0].values[0] = TesterValuesColumnValue("RENKO (5)", TYPE_DOUBLE, 0, 1000, 25, 28.21, 25, 26.3, 23, 3);
 
   Print("Fetched values for params: ", getValuesParams.ToString());
 
