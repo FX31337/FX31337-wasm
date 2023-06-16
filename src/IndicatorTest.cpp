@@ -627,8 +627,7 @@ EMSCRIPTEN_BINDINGS(Tester) {
                       emscripten::allow_raw_pointer<emscripten::arg<0>>())
       .class_function("GetTimeByScrollAndZoom", &Tester::GetTimeByScrollAndZoom)
       .class_function(
-          "GetValues", &Tester::GetValues,
-          emscripten::optional_override([](int64 timeFromMs, int64 timeToMs, int timeStepSecs, bool aggregateNoFits) {
+          "GetValues", emscripten::optional_override([](int64 timeFromMs, int64 timeToMs, int timeStepSecs, bool aggregateNoFits) {
             return Tester::GetValues(timeFromMs, timeToMs, timeStepSecs, aggregateNoFits);
           }));
 }
