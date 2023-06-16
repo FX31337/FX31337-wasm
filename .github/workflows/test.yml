@@ -1,7 +1,7 @@
 ---
 name: Test
 
-# yamllint disable rule:truthy
+# yamllint disable-line rule:truthy
 on:
   pull_request:
   push:
@@ -10,10 +10,10 @@ jobs:
   Compile:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
-      - uses: mymindstorm/setup-emsdk@v11
+      - uses: mymindstorm/setup-emsdk@v12
         with:
           version: 'latest'
       - name: Verify emcc
@@ -33,7 +33,7 @@ jobs:
         testjs:
           - IndicatorTest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
           node-version: 19.x

@@ -18,18 +18,18 @@ jobs:
         shell: bash
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
       - name: Install Emscripten toolchain
-        uses: mymindstorm/setup-emsdk@v11
+        uses: mymindstorm/setup-emsdk@v12
       - name: Install CPP compiler
         uses: rlalik/setup-cpp-compiler@v1.1
         with:
           compiler: gcc-latest
       - run: npm install
       - run: npm run build
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: dist
           path: dist
@@ -42,8 +42,8 @@ jobs:
     needs: [Compile]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/download-artifact@v2
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
         with:
           name: dist
           path: dist
