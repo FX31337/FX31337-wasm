@@ -9,11 +9,9 @@ RM=find . \( -name "*.o"  -o -name "*.obj" -o -name "*.wasm" -o -name "*.js" \) 
 
 .PHONY: all clean test
 
-#compile: TaskRunner.o TaskRunner.js TradeSignalManager.o TradeSignalManager.js
-#compile: TradeSignalManager.o TradeSignalManager.js
 compile: \
 	IndicatorTest.o IndicatorTest.js \
-#	TaskRunner.o TaskRunner.js \
+	TaskRunner.o TaskRunner.js \
 	classes/Task/tests/Task.test.o classes/Task/tests/Task.test.js \
 	classes/Task/tests/Taskable.test.o classes/Task/tests/Taskable.test.js \
 	classes/Task/tests/TaskAction.test.o classes/Task/tests/TaskAction.test.js \
