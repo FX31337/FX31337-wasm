@@ -33,15 +33,15 @@
 #define __debug_verbose__
 
 // Local includes.
-#include "classes/Array.extern.h"
-#include "classes/Chart.enum.h"
-#include "classes/DictStruct.mqh"
+#include "classes/Storage/Array.extern.h"
+#include "classes/Platform/Chart/Chart.enum.h"
+#include "classes/Storage/Dict/DictStruct.h"
 #include "classes/Indicator/Indicator.h"
 #include "classes/Indicator/tests/classes/IndicatorTfDummy.h"
 #include "classes/Indicator/tests/classes/Indicators.h"
-#include "classes/Indicators/Indi_RSI.mqh"
+#include "classes/Indicators/Oscillator/Indi_RSI.h"
 #include "classes/Indicators/Tick/Indi_TickProvider.h"
-#include "classes/Platform.h"
+#include "classes/Platform/Platform.h"
 #include "classes/Tick/Tick.struct.h"
 
 #define INDICATOR_TEST_SYMBOL "EURUSD"

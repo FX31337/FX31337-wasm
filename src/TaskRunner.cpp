@@ -29,12 +29,12 @@
 #define __debug_verbose__
 
 // Local includes.
-#include "classes/Account/Account.h"
+#include "classes/Exchange/Account/Account.h"
 #include "classes/Exchange/Exchange.h"
 #include "classes/Common.define.h"
 #include "classes/Common.extern.h"
 #include "classes/Std.h"
-#include "classes/String.extern.h"
+#include "classes/Storage/String.extern.h"
 #include "classes/Task/Task.h"
 #include "classes/Task/TaskManager.h"
 
