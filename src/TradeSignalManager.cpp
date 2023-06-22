@@ -22,20 +22,20 @@
  * Trade.
  */
 
-
 // Includes.
-#include <cmath>
 #include "classes/Trade/TradeSignalManager.h"
-#include "classes/Common.extern.h"
+
+#include <cmath>
+
 #include "classes/Common.define.h"
 #include "classes/Common.extern.h"
 #include "classes/Std.h"
 #include "classes/String.extern.h"
-#include "classes/Task/Taskable.h"
 #include "classes/Task/TaskAction.h"
 #include "classes/Task/TaskCondition.struct.h"
 #include "classes/Task/TaskGetter.struct.h"
 #include "classes/Task/TaskSetter.struct.h"
+#include "classes/Task/Taskable.h"
 
 #ifdef EMSCRIPTEN
 #include <emscripten/bind.h>
@@ -44,17 +44,11 @@ using namespace emscripten;
 
 class Test {
  public:
-   int add(int a, int b) { return a + b; }
+  int add(int a, int b) { return a + b; }
 };
 
-
 #ifdef EMSCRIPTEN
-EMSCRIPTEN_BINDINGS(Test) {
-  class_<Test>("Test")
-    .constructor()
-    .function("add", &Test::add)
-    ;
-}
+EMSCRIPTEN_BINDINGS(Test) { class_<Test>("Test").constructor().function("add", &Test::add); }
 #endif
 
 // Declare and define the external functions and variables.
@@ -62,7 +56,7 @@ EMSCRIPTEN_BINDINGS(Test) {
 extern "C" {
 #endif
 
-  // Define test classes.
+// Define test classes.
 class ConditionType1 : public TaskConditionBase {
  public:
   bool Check(const TaskConditionEntry &_entry) { return true; }
@@ -91,7 +85,7 @@ class TaskType1 : public Taskable<MqlParam> {
 
 int sum(int a, int b) { return a + b; }
 bool test() {
-  //printf("%s\n", __builtin_FUNCTION());
+  // printf("%s\n", __builtin_FUNCTION());
   TradeSignalManager tsm;
   TradeSignalEntry signal1;
   TaskAction<ActionType1> _taction1;

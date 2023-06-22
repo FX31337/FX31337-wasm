@@ -33,15 +33,15 @@
 #define __debug_verbose__
 
 // Local includes.
-#include "classes/Storage/Array.extern.h"
-#include "classes/Platform/Chart/Chart.enum.h"
-#include "classes/Storage/Dict/DictStruct.h"
 #include "classes/Indicator/Indicator.h"
 #include "classes/Indicator/tests/classes/IndicatorTfDummy.h"
 #include "classes/Indicator/tests/classes/Indicators.h"
 #include "classes/Indicators/Oscillator/Indi_RSI.h"
 #include "classes/Indicators/Tick/Indi_TickProvider.h"
+#include "classes/Platform/Chart/Chart.enum.h"
 #include "classes/Platform/Platform.h"
+#include "classes/Storage/Array.extern.h"
+#include "classes/Storage/Dict/DictStruct.h"
 #include "classes/Tick/Tick.struct.h"
 
 #define INDICATOR_TEST_SYMBOL "EURUSD"
@@ -626,10 +626,10 @@ EMSCRIPTEN_BINDINGS(Tester) {
       .class_function("FeedTickProvider", &Tester::FeedTickProvider,
                       emscripten::allow_raw_pointer<emscripten::arg<0>>())
       .class_function("GetTimeByScrollAndZoom", &Tester::GetTimeByScrollAndZoom)
-      .class_function(
-          "GetValues", emscripten::optional_override([](int64 timeFromMs, int64 timeToMs, int timeStepSecs, bool aggregateNoFits) {
-            return Tester::GetValues(timeFromMs, timeToMs, timeStepSecs, aggregateNoFits);
-          }));
+      .class_function("GetValues", emscripten::optional_override(
+                                       [](int64 timeFromMs, int64 timeToMs, int timeStepSecs, bool aggregateNoFits) {
+                                         return Tester::GetValues(timeFromMs, timeToMs, timeStepSecs, aggregateNoFits);
+                                       }));
 }
 
 // struct IndicatorData[]
