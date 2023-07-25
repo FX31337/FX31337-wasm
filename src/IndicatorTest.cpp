@@ -406,7 +406,7 @@ class Tester {
 
     int _num_tf = 0, _num_loose_tf = 0;
 
-    for (DictStructIterator<long, Ref<IndicatorData>> _iter = Platform::GetIndicators() PTR_DEREF Begin();
+    for (DictStructIterator<int64, Ref<IndicatorData>> _iter = Platform::GetIndicators() PTR_DEREF Begin();
          _iter.IsValid(); ++_iter) {
       IndicatorData *_indi = _iter.Value().Ptr();
       if (_indi PTR_DEREF IsCandleIndicator() || _iter.Value() REF_DEREF IsTickIndicator()) {
@@ -428,7 +428,7 @@ class Tester {
 
     // Next step is to generate values for each type of indicators.
 
-    for (DictStructIterator<long, Ref<IndicatorData>> _iter = Platform::GetIndicators() PTR_DEREF Begin();
+    for (DictStructIterator<int64, Ref<IndicatorData>> _iter = Platform::GetIndicators() PTR_DEREF Begin();
          _iter.IsValid(); ++_iter) {
       IndicatorData *_indi = _iter.Value().Ptr();
       if (_indi PTR_DEREF IsCandleIndicator() || _iter.Value() REF_DEREF IsTickIndicator()) {
@@ -543,7 +543,7 @@ class Tester {
   static bool RunTick() {
     Platform::Tick();
 
-    for (DictStructIterator<long, Ref<IndicatorData>> _iter = Platform::GetIndicators() PTR_DEREF Begin();
+    for (DictStructIterator<int64, Ref<IndicatorData>> _iter = Platform::GetIndicators() PTR_DEREF Begin();
          _iter.IsValid(); ++_iter) {
       if (_iter.Value() REF_DEREF IsCandleIndicator() || _iter.Value() REF_DEREF IsTickIndicator()) {
         // We don't need values of candle or tick indicators.
@@ -574,7 +574,7 @@ class Tester {
   static ARRAY_TYPE(Ref<IndicatorData>) GetIndicators() {
     ARRAY(Ref<IndicatorData>, _indis);
 
-    for (DictStructIterator<long, Ref<IndicatorData>> iter = Platform::GetIndicators() PTR_DEREF Begin();
+    for (DictStructIterator<int64, Ref<IndicatorData>> iter = Platform::GetIndicators() PTR_DEREF Begin();
          iter.IsValid(); ++iter) {
       ArrayPush(_indis, iter.Value());
     }
