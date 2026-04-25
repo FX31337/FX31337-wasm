@@ -30,7 +30,6 @@
 #include "classes/Common.define.h"
 #include "classes/Common.extern.h"
 #include "classes/Std.h"
-#include "classes/String.extern.h"
 #include "classes/Task/TaskAction.h"
 #include "classes/Task/TaskCondition.struct.h"
 #include "classes/Task/TaskGetter.struct.h"

@@ -1,0 +1,43 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      // Debugs TypeScript via tsx source maps + C++ via WASM DWARF debug info.
+      // Requires the "WebAssembly DWARF Debugging" extension (ms-vscode.wasm-dwarf-debugging).
+      "type": "node",
+      "request": "launch",
+      "name": "Debug IndicatorTest (TS + WASM)",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "--import",
+        "tsx"
+      ],
+      "program": "${workspaceFolder}/tests/js/IndicatorTest.ts",
+      "cwd": "${workspaceFolder}",
+      "sourceMaps": true,
+      "smartStep": true,
+      "env": {
+        "NODE_PATH": "${workspaceFolder}/node_modules"
+      }
+    },
+    {
+      // Same as above but runs `npm run build` first.
+      "type": "node",
+      "request": "launch",
+      "name": "Build & Debug IndicatorTest (TS + WASM)",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "--import",
+        "tsx"
+      ],
+      "program": "${workspaceFolder}/tests/js/IndicatorTest.ts",
+      "cwd": "${workspaceFolder}",
+      "sourceMaps": true,
+      "smartStep": true,
+      "env": {
+        "NODE_PATH": "${workspaceFolder}/node_modules"
+      },
+      "preLaunchTask": "build"
+    }
+  ]
+}
