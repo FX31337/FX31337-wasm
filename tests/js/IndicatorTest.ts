@@ -6,6 +6,8 @@ const contentWasm: string = 'dist/IndicatorTest.wasm';
 class IndicatorRunTest extends Test {
   run(lib: LibModule): void {
 
+    lib.Tester.Init();
+
     console.log(lib);
 
     const ticker = new lib.indicators.TickProvider({ symbol: 'EURUSD' });

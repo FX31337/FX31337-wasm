@@ -40,12 +40,11 @@
     "url": "git+https://github.com/FX31337/FX31337-wasm.git"
   },
   "scripts": {
-    "build": "make -C src",
+    "build": "node scripts/build.mjs",
     "build-lib": "./node_modules/.bin/rollup -c",
-    "clean": "make -C src clean",
-    "postbuild": "find src \\( -name '*.obj' -o -name '*.wasm' -o -name '*.js' \\) -type f -exec mv -v {} dist/ \\;",
-    "rebuild": "npm run clean; npm run build",
-    "start": "cd dist; http-server",
+    "clean": "node scripts/clean.mjs",
+    "rebuild": "npm run clean && npm run build",
+    "start": "cd dist && http-server",
     "test": "tsx tests/js/IndicatorTest.ts"
   },
   "keywords": [

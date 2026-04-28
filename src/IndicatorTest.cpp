@@ -554,9 +554,9 @@ class Tester {
       IndicatorDataEntry _entry = _iter.Value() REF_DEREF GetEntry();
 
       if (_entry.IsValid()) {
-        Print(_iter.Value() REF_DEREF GetFullName(), "'s value: ", _entry.ToCSV<double>());
+        Print(TimeCurrent(), ": ", _iter.Value() REF_DEREF GetFullName(), "'s value: ", _entry.ToCSV<double>());
       } else {
-        Print(_iter.Value() REF_DEREF GetFullName(), " requires more ticks.");
+        Print(TimeCurrent(), ": ", _iter.Value() REF_DEREF GetFullName(), " requires more ticks.");
       }
     }
 
