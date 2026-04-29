@@ -490,27 +490,28 @@ class Tester {
    * Helper function for feeding given tick provider with some random ticks.
    **/
   static void FeedTickProvider(Ref<Indi_TickProvider> _tick_provider) {
-    // We'd like to have reproducible ticks.
-    srand(230);
-
     Print("Feeding Tick Provider with random values...");
     ARRAY(TickTAB<double>, _ticks);
 
-    int64 _dt = Platform::Timestamp();
+    // We start at 2000-01-01, but it doesn't matter. We just need to have increasing time for each tick.
+    int64 _dt = 946684800;
 
-    double _curr_ask = 1.0;
-    double _curr_bid = 1.2;
+    // Use a sinusoidal price to guarantee that RSI oscillates visibly.
+    // - Mean price = 1.0, amplitude = 0.3  → range [0.7, 1.3]
+    // - One full price cycle = 120 ticks = 40 M1 bars (3 ticks/bar)
+    // - RSI period is 13 bars. The half-cycle (20 bars) must be > RSI period so
+    //   the SMMA can track each direction change and produce clear oscillations.
+    const double _mean        = 1.0;
+    const double _amplitude   = 0.3;
+    const double _spread      = 0.2;
+    const double _pi          = acos(-1.0);
+    const int    _cycle_ticks = 120; // ticks per full price cycle (40 M1 bars)
 
-    for (int i = 0; i < 100; ++i) {
-      if (i % 10 == 0) srand(i);
-
-      double _bit = 0.1;
-      double _sign = ((rand() % RAND_MAX) < RAND_MAX / 2) ? -1 : 1;
-
-      _curr_ask += _bit * _sign;
-      _curr_bid += _bit * _sign;
+    for (int i = 0; i < 600; ++i) {
+      double _ask = _mean + _amplitude * sin(2.0 * _pi * i / _cycle_ticks);
+      double _bid = _ask + _spread;
       // One tick per 20s. 3 ticks in a minute.
-      ArrayPush(_ticks, TickTAB<double>((_dt + i) * 1000 * 20, _curr_ask, _curr_bid));
+      ArrayPush(_ticks, TickTAB<double>((_dt + i * 20) * 1000, _ask, _bid));
     }
 
     _tick_provider REF_DEREF Feed(_ticks);
