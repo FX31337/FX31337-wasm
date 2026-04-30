@@ -15,4 +15,3 @@ class TaskRunnerTest extends Test {
 }
 
 run(TaskRunnerTest, 'TaskRunner');
-

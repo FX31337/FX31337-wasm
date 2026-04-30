@@ -38,4 +38,3 @@ class IndicatorRunTest extends Test {
 }
 
 run(IndicatorRunTest, ContentJs, contentWasm);
-

@@ -11,4 +11,3 @@ export class IndicatorData extends IndicatorBase {
         super();
     }
 }
-

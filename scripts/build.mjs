@@ -1,8 +1,9 @@
 /**
  * Platform-agnostic Emscripten build script.
  *
- * On Windows  : delegates to 'wsl bash' so emsdk runs inside WSL.
- * On Linux/macOS: runs '/bin/bash' directly (emsdk expected at ~/emsdk).
+ * On Windows      : delegates to 'wsl bash' so emsdk runs inside WSL.
+ * On CI (EMSDK set): emcc is already in PATH via setup-emsdk action; just runs make.
+ * On Linux/macOS  : sources emsdk_env.sh from $HOME/emsdk, then runs make.
  *
  * After compilation the generated .obj/.wasm/.js artifacts are moved
  * from src/ to dist/ (replacing the old 'postbuild' npm hook).
@@ -27,8 +28,13 @@ function bash(cmd) {
   if (result.status !== 0) process.exit(result.status ?? 1);
 }
 
-// Compile
-bash('source ~/emsdk/emsdk_env.sh && make -C src');
+// Compile.
+// When EMSDK is set (e.g. emscripten-core/setup-emsdk action), emcc is already
+// in PATH — no need to source emsdk_env.sh again.
+const makeCmd = process.env.EMSDK
+  ? 'make -C src'
+  : 'source ${HOME}/emsdk/emsdk_env.sh && make -C src';
+bash(makeCmd);
 
 // Move artifacts to dist/
 if (!existsSync(dist)) mkdirSync(dist);

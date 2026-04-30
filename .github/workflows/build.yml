@@ -22,7 +22,9 @@ jobs:
         with:
           submodules: recursive
       - name: Install Emscripten toolchain
-        uses: mymindstorm/setup-emsdk@v12
+        uses: emscripten-core/setup-emsdk@v16
+        with:
+          version: 'latest'
       - name: Install CPP compiler
         uses: rlalik/setup-cpp-compiler@v1.1
         with:

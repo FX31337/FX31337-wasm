@@ -10,4 +10,3 @@ class TradeSignalManagerTest extends Test {
 }
 
 run(TradeSignalManagerTest, 'TradeSignalManager');
-
