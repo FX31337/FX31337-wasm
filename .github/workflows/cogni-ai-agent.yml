@@ -1,7 +1,6 @@
 ---
 # See: <https://opencode.ai/docs>
 name: Cogni AI Agent
-
 # yamllint disable-line rule:truthy
 on:
   issues:
@@ -60,43 +59,49 @@ on:
         description: Prompt for the agent
         required: true
         type: string
-
 jobs:
   cogni-ai-agent:
-    name: Cogni AI Agent
+    name: Run Cogni AI agent
     runs-on: ubuntu-latest
     if: |
       github.event_name != 'issues' ||
       !github.event.issue.pull_request
     permissions:
-      actions: read
       contents: write
       id-token: write
       issues: write
-      packages: read
       pull-requests: write
     steps:
       - uses: actions/checkout@v6
         with:
           persist-credentials: false  # Prevents Duplicate header: "Authorization" error.
+      - uses: actions/setup-python@v6.1.0
+        with:
+          python-version: '3.12'
+      - name: Restore Python user site
+        id: python-user-site
+        uses: actions/cache@v5.0.1
+        with:
+          path: ~/.local
+          key: ${{ runner.os }}-pip-${{ hashFiles('.devcontainer/requirements.txt') }}
+      - name: Install Python dependencies
+        if: steps.python-user-site.outputs.cache-hit != 'true'
+        run: python -m pip install --user -r .devcontainer/requirements.txt
+      - name: Ensure local bin on PATH
+        run: echo "$HOME/.local/bin" >> "$GITHUB_PATH"
       # See: <https://github.com/Cogni-AI-OU/cogni-ai-agent-action>
       - name: Run Cogni AI Agent
         uses: Cogni-AI-OU/cogni-ai-agent-action@main
         with:
-          model: ${{ inputs.model || 'opencode/gemini-3-flash' }}
+          model: ${{ inputs.model }}
           opencode-api-key: ${{ secrets.OPENCODE_API_KEY }}  # <https://opencode.ai/auth>
           permissions: |-
             bash:
               '*': deny
               ansible*: allow
               ansible-galaxy*: allow
-              ansible-lint*: allow
               ansible-playbook*: allow
-              ar*: allow
               awk*: allow
-              cat*: allow
-              cc*: allow
-              clang*: allow
               continue*: allow
               cp*: allow
               docker*: allow
@@ -104,31 +109,16 @@ jobs:
               gh*: allow
               gh pr review*: allow
               git*: allow
-              grep*: allow
-              gcc*: allow
-              gdb*: allow
-              head*: allow
               hexdump*: allow
               jq*: allow
               links*: allow
-              ls*: allow
-              make*: allow
               mawk*: allow
-              mkdir*: allow
               molecule*: allow
-              mv*: allow
               pipx*: allow
-              pkg-config*: allow
-              pmars*: allow
               pre-commit*: allow
               printf*: allow
-              ranlib*: allow
-              rm*: allow
-              sdl-config*: allow
               sed*: allow
               set*: allow
-              stat*: allow
-              strip*: allow
               time*: allow
               timeout*: allow
               touch*: allow
@@ -142,21 +132,21 @@ jobs:
               github.event.pull_request.body ||
               inputs.prompt
             }}
-    timeout-minutes: 60
-
   summary:
-    name: Summary
+    name: Generate Summary (post-run)
     needs: cogni-ai-agent
-    if: always()
+    if: always() && needs.cogni-ai-agent.result != 'skipped'
     runs-on: ubuntu-latest
     permissions:
       actions: read
+      contents: read
       id-token: write
-      issues: write
-      pull-requests: write
     steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
       - name: Generate Summary
         uses: Cogni-AI-OU/cogni-ai-agent-action/ai-inference/summary@main
         with:
           agent_job_id: cogni-ai-agent
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ github.token }}
