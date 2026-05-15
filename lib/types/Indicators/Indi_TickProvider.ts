@@ -8,7 +8,7 @@ export interface Indi_TickProviderParams {
 
 export class Indi_TickProvider extends Indicator {
   constructor(params: Indi_TickProviderParams) {
-    super();
+    super(params as any);
   }
   Feed(ticks: CppArray<TickTAB>): void {}
   BufferSize(): number { return 0; }

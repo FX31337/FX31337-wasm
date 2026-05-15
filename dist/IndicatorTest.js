@@ -2464,6 +2464,92 @@ async function createWasm() {
     };
 
   
+  
+  
+  
+  
+  
+  
+  var validateThis = (this_, classType, humanName) => {
+      if (!(this_ instanceof Object)) {
+        throwBindingError(`${humanName} with invalid "this": ${this_}`);
+      }
+      if (!(this_ instanceof classType.registeredClass.constructor)) {
+        throwBindingError(`${humanName} incompatible with "this" of type ${this_.constructor.name}`);
+      }
+      if (!this_.$$.ptr) {
+        throwBindingError(`cannot call emscripten binding method ${humanName} on deleted object`);
+      }
+  
+      // todo: kill this
+      return upcastPointer(this_.$$.ptr,
+                           this_.$$.ptrType.registeredClass,
+                           classType.registeredClass);
+    };
+  var __embind_register_class_property = (classType,
+                                      fieldName,
+                                      getterReturnType,
+                                      getterSignature,
+                                      getter,
+                                      getterContext,
+                                      setterArgumentType,
+                                      setterSignature,
+                                      setter,
+                                      setterContext) => {
+      fieldName = AsciiToString(fieldName);
+      getter = embind__requireFunction(getterSignature, getter);
+  
+      whenDependentTypesAreResolved([], [classType], (classType) => {
+        classType = classType[0];
+        var humanName = `${classType.name}.${fieldName}`;
+        var desc = {
+          get() {
+            throwUnboundTypeError(`Cannot access ${humanName} due to unbound types`, [getterReturnType, setterArgumentType]);
+          },
+          enumerable: true,
+          configurable: true
+        };
+        if (setter) {
+          desc.set = () => throwUnboundTypeError(`Cannot access ${humanName} due to unbound types`, [getterReturnType, setterArgumentType]);
+        } else {
+          desc.set = (v) => throwBindingError(humanName + ' is a read-only property');
+        }
+  
+        Object.defineProperty(classType.registeredClass.instancePrototype, fieldName, desc);
+  
+        whenDependentTypesAreResolved(
+          [],
+          (setter ? [getterReturnType, setterArgumentType] : [getterReturnType]),
+        (types) => {
+          var getterReturnType = types[0];
+          var desc = {
+            get() {
+              var ptr = validateThis(this, classType, humanName + ' getter');
+              return getterReturnType.fromWireType(getter(getterContext, ptr));
+            },
+            enumerable: true
+          };
+  
+          if (setter) {
+            setter = embind__requireFunction(setterSignature, setter);
+            var setterArgumentType = types[1];
+            desc.set = function(v) {
+              var ptr = validateThis(this, classType, humanName + ' setter');
+              var destructors = [];
+              setter(setterContext, ptr, setterArgumentType.toWireType(destructors, v));
+              runDestructors(destructors);
+            };
+          }
+  
+          Object.defineProperty(classType.registeredClass.instancePrototype, fieldName, desc);
+          return [];
+        });
+  
+        return [];
+      });
+    };
+
+  
   var emval_freelist = [];
   
   var emval_handles = [0,1,,1,null,1,true,1,false,1];
@@ -3332,11 +3418,24 @@ ${functionBody}
     };
 
 
+  var __emval_incref = (handle) => {
+      if (handle > 9) {
+        emval_handles[handle + 1] += 1;
+      }
+    };
+
   
   
   var __emval_invoke = (caller, handle, methodName, destructorsRef, args) => {
       return emval_methodCallers[caller](handle, methodName, destructorsRef, args);
     };
+
+  var __emval_new_array = () => Emval.toHandle([]);
+
+  
+  var __emval_new_cstring = (v) => Emval.toHandle(getStringOrSymbol(v));
+
+  var __emval_new_object = () => Emval.toHandle({});
 
   
   
@@ -3344,6 +3443,13 @@ ${functionBody}
       var destructors = Emval.toValue(handle);
       runDestructors(destructors);
       __emval_decref(handle);
+    };
+
+  var __emval_set_property = (handle, key, value) => {
+      handle = Emval.toValue(handle);
+      key = Emval.toValue(key);
+      value = Emval.toValue(value);
+      handle[key] = value;
     };
 
   var isLeapYear = (year) => year%4 === 0 && (year%100 !== 0 || year%400 === 0);
@@ -6513,7 +6619,6 @@ if (Module['wasmBinary']) wasmBinary = Module['wasmBinary'];
   'getInheritedInstanceCount',
   'getLiveInheritedInstances',
   'setDelayFunction',
-  'validateThis',
   'count_emval_handles',
   'isCppExceptionObject',
 ];
@@ -6832,6 +6937,7 @@ missingLibrarySymbols.forEach(missingLibrarySymbol)
   'shallowCopyInternalPointer',
   'downcastPointer',
   'upcastPointer',
+  'validateThis',
   'char_0',
   'char_9',
   'makeLegalFunctionName',
@@ -6975,6 +7081,8 @@ var wasmImports = {
   /** @export */
   _embind_register_class_function: __embind_register_class_function,
   /** @export */
+  _embind_register_class_property: __embind_register_class_property,
+  /** @export */
   _embind_register_emval: __embind_register_emval,
   /** @export */
   _embind_register_enum: __embind_register_enum,
@@ -7011,9 +7119,19 @@ var wasmImports = {
   /** @export */
   _emval_decref: __emval_decref,
   /** @export */
+  _emval_incref: __emval_incref,
+  /** @export */
   _emval_invoke: __emval_invoke,
   /** @export */
+  _emval_new_array: __emval_new_array,
+  /** @export */
+  _emval_new_cstring: __emval_new_cstring,
+  /** @export */
+  _emval_new_object: __emval_new_object,
+  /** @export */
   _emval_run_destructors: __emval_run_destructors,
+  /** @export */
+  _emval_set_property: __emval_set_property,
   /** @export */
   _localtime_js: __localtime_js,
   /** @export */
@@ -7061,8 +7179,6 @@ var wasmImports = {
   /** @export */
   invoke_iiddddj,
   /** @export */
-  invoke_iidi,
-  /** @export */
   invoke_iii,
   /** @export */
   invoke_iiii,
@@ -7103,8 +7219,6 @@ var wasmImports = {
   /** @export */
   invoke_vi,
   /** @export */
-  invoke_vid,
-  /** @export */
   invoke_vidi,
   /** @export */
   invoke_vidiii,
@@ -7144,6 +7258,8 @@ var wasmImports = {
   invoke_viji,
   /** @export */
   invoke_vijii,
+  /** @export */
+  invoke_vijjii,
   /** @export */
   proc_exit: _proc_exit
 };
@@ -7369,6 +7485,28 @@ function invoke_i(index) {
   }
 }
 
+function invoke_di(index,a1) {
+  var sp = stackSave();
+  try {
+    return getWasmTableEntry(index)(a1);
+  } catch(e) {
+    stackRestore(sp);
+    if (!(e instanceof EmscriptenEH)) throw e;
+    _setThrew(1, 0);
+  }
+}
+
+function invoke_vidiii(index,a1,a2,a3,a4,a5) {
+  var sp = stackSave();
+  try {
+    getWasmTableEntry(index)(a1,a2,a3,a4,a5);
+  } catch(e) {
+    stackRestore(sp);
+    if (!(e instanceof EmscriptenEH)) throw e;
+    _setThrew(1, 0);
+  }
+}
+
 function invoke_iiiiiiii(index,a1,a2,a3,a4,a5,a6,a7) {
   var sp = stackSave();
   try {
@@ -7407,17 +7545,6 @@ function invoke_diii(index,a1,a2,a3) {
   var sp = stackSave();
   try {
     return getWasmTableEntry(index)(a1,a2,a3);
-  } catch(e) {
-    stackRestore(sp);
-    if (!(e instanceof EmscriptenEH)) throw e;
-    _setThrew(1, 0);
-  }
-}
-
-function invoke_vid(index,a1,a2) {
-  var sp = stackSave();
-  try {
-    getWasmTableEntry(index)(a1,a2);
   } catch(e) {
     stackRestore(sp);
     if (!(e instanceof EmscriptenEH)) throw e;
@@ -7473,17 +7600,6 @@ function invoke_dii(index,a1,a2) {
   var sp = stackSave();
   try {
     return getWasmTableEntry(index)(a1,a2);
-  } catch(e) {
-    stackRestore(sp);
-    if (!(e instanceof EmscriptenEH)) throw e;
-    _setThrew(1, 0);
-  }
-}
-
-function invoke_iidi(index,a1,a2,a3) {
-  var sp = stackSave();
-  try {
-    return getWasmTableEntry(index)(a1,a2,a3);
   } catch(e) {
     stackRestore(sp);
     if (!(e instanceof EmscriptenEH)) throw e;
@@ -7558,17 +7674,6 @@ function invoke_iiji(index,a1,a2,a3) {
   }
 }
 
-function invoke_vidiii(index,a1,a2,a3,a4,a5) {
-  var sp = stackSave();
-  try {
-    getWasmTableEntry(index)(a1,a2,a3,a4,a5);
-  } catch(e) {
-    stackRestore(sp);
-    if (!(e instanceof EmscriptenEH)) throw e;
-    _setThrew(1, 0);
-  }
-}
-
 function invoke_jii(index,a1,a2) {
   var sp = stackSave();
   try {
@@ -7578,6 +7683,17 @@ function invoke_jii(index,a1,a2) {
     if (!(e instanceof EmscriptenEH)) throw e;
     _setThrew(1, 0);
     return 0n;
+  }
+}
+
+function invoke_vijjii(index,a1,a2,a3,a4,a5) {
+  var sp = stackSave();
+  try {
+    getWasmTableEntry(index)(a1,a2,a3,a4,a5);
+  } catch(e) {
+    stackRestore(sp);
+    if (!(e instanceof EmscriptenEH)) throw e;
+    _setThrew(1, 0);
   }
 }
 
@@ -7596,17 +7712,6 @@ function invoke_viiji(index,a1,a2,a3,a4) {
   var sp = stackSave();
   try {
     getWasmTableEntry(index)(a1,a2,a3,a4);
-  } catch(e) {
-    stackRestore(sp);
-    if (!(e instanceof EmscriptenEH)) throw e;
-    _setThrew(1, 0);
-  }
-}
-
-function invoke_di(index,a1) {
-  var sp = stackSave();
-  try {
-    return getWasmTableEntry(index)(a1);
   } catch(e) {
     stackRestore(sp);
     if (!(e instanceof EmscriptenEH)) throw e;

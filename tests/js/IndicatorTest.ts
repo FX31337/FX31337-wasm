@@ -1,7 +1,6 @@
-import { Test, run, LibModule, ContentJsLoader } from '../../lib/Runner';
-import ContentJs from '../../dist/IndicatorTest';
-
-const contentWasm: string = 'dist/IndicatorTest.wasm';
+import { Test, run, LibModule } from '../../lib/Runner';
+import { TesterValues } from '../../lib/types/TesterValues';
+import wasmJs from '../../dist/IndicatorTest';
 
 class IndicatorRunTest extends Test {
   run(lib: LibModule): void {
@@ -16,6 +15,7 @@ class IndicatorRunTest extends Test {
     tfM5.SetSource(ticker);
 
     const rsiM5 = new lib.indicators.RSI({ period: 13, appliedPrice: lib.ap.open, shift: 0 });
+    rsiM5.SetName("RSI M5");
     rsiM5.SetSource(tfM5);
 
     lib.Tester.Add(rsiM5);
@@ -34,7 +34,13 @@ class IndicatorRunTest extends Test {
 
     // You can also use tester.RunTick() method in a loop or if you're sure that new tick arrived.
     lib.Tester.RunAllTicks();
+
+    // const values: TesterValues = lib.Tester.GetValues(BigInt(946684800000), BigInt(946685980000), 60, true);
+
+    const values: TesterValues = lib.Tester.GetValues(BigInt(0), BigInt(1000), 60, true);
+
+    console.log(values.timestep_based);
   }
 }
 
-run(IndicatorRunTest, ContentJs, contentWasm);
+run(IndicatorRunTest, wasmJs, 'dist/IndicatorTest.wasm');

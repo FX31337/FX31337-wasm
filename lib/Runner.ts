@@ -1,6 +1,7 @@
 import { Tester } from './types/Tester';
 import { TickAB } from './types/TickAB';
 import { TickTAB } from './types/TickTAB';
+import { IndicatorDataEntry } from './types/IndicatorDataEntry';
 import { timeframes } from '.';
 import { type IndicatorTf } from './types/Indicators/IndicatorTf';
 import { type IndicatorData } from './types/Indicators/IndicatorData';
@@ -10,6 +11,7 @@ export type LibModuleDefaults = {
   [key: string]: any;
   TickAB: typeof TickAB;
   TickTAB: typeof TickTAB;
+  IndicatorDataEntry: typeof IndicatorDataEntry;
   indicators: {
     TickProvider: typeof Indi_TickProvider;
     Tf: typeof IndicatorTf;
