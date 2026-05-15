@@ -1,0 +1,7 @@
+{
+  "recommendations": [
+    // Enables C++ source-level debugging of .wasm files via DWARF debug info
+    // (works automatically in any Node.js or Chrome debug session that loads .wasm).
+    "ms-vscode.wasm-dwarf-debugging"
+  ]
+}

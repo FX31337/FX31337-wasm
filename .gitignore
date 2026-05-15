@@ -29,3 +29,4 @@ node_modules/
 *.sln
 *.vcxproj*
 /src/out
+x64
